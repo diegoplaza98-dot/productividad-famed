@@ -1,0 +1,291 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#173d32">
+  <title>Productividad FAMED</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f3f5f3;
+      color: #26352e;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      background: white;
+      border-radius: 18px;
+      padding: 30px 24px;
+      box-shadow: 0 8px 30px rgba(0,0,0,.07);
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .brand h1 {
+      color: #173d32;
+      font-size: 25px;
+      letter-spacing: 1px;
+      margin: 0 0 8px;
+    }
+
+    .brand p {
+      color: #78847d;
+      font-size: 14px;
+      margin: 0;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: bold;
+      margin: 18px 0 7px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #dce3de;
+      border-radius: 9px;
+      font-size: 16px;
+      background: #fafcfb;
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 9px;
+      background: #173d32;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 22px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: .6;
+    }
+
+    #message {
+      font-size: 14px;
+      line-height: 1.5;
+      margin-top: 16px;
+      text-align: center;
+      overflow-wrap: anywhere;
+    }
+
+    .success { color: #18794e; }
+    .error { color: #bd3434; }
+
+    #dashboard {
+      display: none;
+      text-align: center;
+    }
+
+    .welcome {
+      background: #edf3ef;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .welcome h2 {
+      color: #173d32;
+      margin-top: 0;
+    }
+
+    .logout {
+      background: #e8ece9;
+      color: #26352e;
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="container">
+
+    <div class="brand">
+      <h1>CLÍNICAS FAMED</h1>
+      <p>Control de productividad</p>
+    </div>
+
+    <section id="login">
+      <h2>Acceso de administrador</h2>
+      <p>Introduce tus credenciales para acceder.</p>
+
+      <form id="loginForm">
+        <label for="email">Correo electrónico</label>
+        <input
+          type="email"
+          id="email"
+          placeholder="Tu correo electrónico"
+          autocomplete="username"
+          required
+        >
+
+        <label for="password">Contraseña</label>
+        <input
+          type="password"
+          id="password"
+          placeholder="Tu contraseña"
+          autocomplete="current-password"
+          required
+        >
+
+        <button type="submit" id="loginButton">
+          Iniciar sesión
+        </button>
+      </form>
+    </section>
+
+    <section id="dashboard">
+      <div class="welcome">
+        <h2>¡Bienvenido!</h2>
+        <p>Has iniciado sesión correctamente.</p>
+        <p>La conexión con Productividad FAMED está activa.</p>
+      </div>
+
+      <button class="logout" id="logoutButton">
+        Cerrar sesión
+      </button>
+    </section>
+
+    <p id="message"></p>
+
+  </main>
+
+  <script>
+    // =====================================
+    // CONFIGURACIÓN DE SUPABASE
+    // =====================================
+
+    const SUPABASE_URL = "https://orokidiumerjlhwcpsej.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_le92S4ET4dt5c5vNvyXQmQ_jr_buC3X";
+
+    const supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+    // =====================================
+    // ELEMENTOS DE LA PANTALLA
+    // =====================================
+
+    const loginSection = document.getElementById("login");
+    const dashboardSection = document.getElementById("dashboard");
+    const message = document.getElementById("message");
+    const loginForm = document.getElementById("loginForm");
+    const loginButton = document.getElementById("loginButton");
+
+    function showMessage(text, type = "") {
+      message.textContent = text;
+      message.className = type;
+    }
+
+    function showDashboard() {
+      loginSection.style.display = "none";
+      dashboardSection.style.display = "block";
+      showMessage("Sesión iniciada correctamente.", "success");
+    }
+
+    function showLogin() {
+      loginSection.style.display = "block";
+      dashboardSection.style.display = "none";
+      loginForm.reset();
+      showMessage("");
+    }
+
+    // =====================================
+    // INICIAR SESIÓN
+    // =====================================
+
+    loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      loginButton.disabled = true;
+      loginButton.textContent = "Conectando...";
+      showMessage("");
+
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      const { data, error } =
+        await supabaseClient.auth.signInWithPassword({
+          email,
+          password
+        });
+
+      loginButton.disabled = false;
+      loginButton.textContent = "Iniciar sesión";
+
+      if (error) {
+        showMessage(
+          "No se pudo iniciar sesión: " + error.message,
+          "error"
+        );
+        return;
+      }
+
+      showDashboard();
+    });
+
+    // =====================================
+    // CERRAR SESIÓN
+    // =====================================
+
+    document.getElementById("logoutButton")
+      .addEventListener("click", async () => {
+
+        const { error } = await supabaseClient.auth.signOut();
+
+        if (error) {
+          showMessage(error.message, "error");
+          return;
+        }
+
+        showLogin();
+      });
+
+    // =====================================
+    // RECUPERAR SESIÓN EXISTENTE
+    // =====================================
+
+    async function checkSession() {
+      const { data, error } =
+        await supabaseClient.auth.getSession();
+
+      if (error) {
+        showMessage(error.message, "error");
+        return;
+      }
+
+      if (data.session) {
+        showDashboard();
+      }
+    }
+
+    checkSession();
+
+  </script>
+
+</body>
+</html>
