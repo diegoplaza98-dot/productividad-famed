@@ -47,6 +47,21 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
 .total-box strong{font-size:23px;color:var(--green)}
 .total-box small{display:block;color:var(--muted);margin-bottom:5px}
 .record-total{font-weight:700;color:var(--green);margin-top:7px}
+.stats-filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:#f4f7f5;border:1px solid var(--border);border-radius:11px;padding:14px;min-width:0}
+.kpi small{display:block;color:var(--muted);font-size:12px;margin-bottom:8px}
+.kpi strong{display:block;color:var(--green);font-size:clamp(17px,2.5vw,24px);overflow-wrap:anywhere}
+.chart-wrap{width:100%;overflow:hidden}
+.chart-wrap svg{width:100%;height:auto;display:block}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:8px 0}
+.legend span:before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--green);margin-right:6px}
+.legend .compare:before{background:var(--gold)}
+.stat-pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.stat-bar{height:10px;background:#e9eeeb;border-radius:10px;overflow:hidden;margin:7px 0 12px}
+.stat-bar span{display:block;height:100%;background:var(--green);border-radius:10px}
+@media(max-width:760px){.stats-filters{grid-template-columns:1fr 1fr}.kpis{grid-template-columns:1fr 1fr}.stat-pair{grid-template-columns:1fr}}
+@media(max-width:420px){.stats-filters{grid-template-columns:1fr}}
 [hidden]{display:none!important}
 @media(max-width:600px){header{padding:15px}header h1{font-size:17px}main{margin-top:15px}.panel{padding:15px}.grid{grid-template-columns:1fr}.item{align-items:flex-start;flex-direction:column}.item-actions{justify-content:flex-start}}
 </style>
@@ -75,7 +90,7 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
     <button class="tab active" data-page="clinics" type="button">Clínicas</button>
     <button class="tab" data-page="employees" type="button">Fisioterapeutas</button>
     <button class="tab" data-page="production" type="button">Producción</button>
-    <button class="tab" type="button" disabled>Estadísticas</button>
+    <button class="tab" data-page="statistics" type="button">Estadísticas</button>
   </nav>
   <div id="message" role="status" aria-live="polite"></div>
 
@@ -149,6 +164,37 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
       <div id="recordCount" class="count" style="margin-top:16px"></div><div id="recordList"></div>
     </div>
   </section>
+
+  <section id="statisticsPage" hidden>
+    <div class="panel">
+      <h2>Filtros de análisis</h2>
+      <p class="description">Selecciona el periodo y el ámbito que quieres analizar. Puedes comparar dos años y uno o varios fisioterapeutas.</p>
+      <div class="stats-filters">
+        <div><label for="statsYear">Año principal</label><select id="statsYear"></select></div>
+        <div><label for="statsCompareYear">Comparar con año</label><select id="statsCompareYear"><option value="">Sin comparación</option></select></div>
+        <div><label for="statsClinic">Clínica</label><select id="statsClinic"><option value="">Todas las clínicas</option></select></div>
+        <div><label for="statsEmployees">Fisioterapeutas</label><select id="statsEmployees" multiple size="3" aria-label="Selecciona uno o varios fisioterapeutas"></select></div>
+      </div>
+      <p class="note">En el selector de fisioterapeutas puedes seleccionar varios. Si no seleccionas ninguno, se incluirán todos.</p>
+      <div class="actions"><button class="primary" type="button" id="refreshStats">Actualizar estadísticas</button></div>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><small>Producción total</small><strong id="statProduction">—</strong></div>
+      <div class="kpi"><small>Objetivos acumulados</small><strong id="statObjective">—</strong></div>
+      <div class="kpi"><small>Objetivo alcanzado</small><strong id="statAchievement">—</strong></div>
+      <div class="kpi"><small>Producción por hora</small><strong id="statHourly">—</strong></div>
+    </div>
+    <div class="panel">
+      <h2>Evolución mensual</h2><p class="description">Producción total por mes del año seleccionado.</p>
+      <div class="legend"><span>Año principal</span><span class="compare" id="compareLegend" hidden>Año de comparación</span></div>
+      <div class="chart-wrap" id="monthlyChart"><div class="empty">Cargando datos…</div></div>
+    </div>
+    <div class="stat-pair">
+      <div class="panel"><h2>Composición de la producción</h2><p class="description">Peso de terapia y clases colectivas.</p><div id="categoryChart"></div></div>
+      <div class="panel"><h2>Producción por fisioterapeuta</h2><p class="description">Ranking del año principal según los filtros seleccionados.</p><div id="employeeChart"></div></div>
+    </div>
+    <div class="panel"><h2>Comparativa anual</h2><p class="description" id="annualComparisonText">Resumen del año seleccionado.</p><div id="annualComparison"></div></div>
+  </section>
 </main>
 </div>
 
@@ -166,6 +212,7 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
   let clinics = [];
   let employees = [];
   let records = [];
+  let statsRecords = [];
   let editingClinicId = null;
   let editingEmployeeId = null;
   let editingRecordId = null;
@@ -202,9 +249,13 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
     $("clinicsPage").hidden = page !== "clinics";
     $("employeesPage").hidden = page !== "employees";
     $("productionPage").hidden = page !== "production";
+    $("statisticsPage").hidden = page !== "statistics";
     document.querySelectorAll(".tab[data-page]").forEach(tab => tab.classList.toggle("active", tab.dataset.page === page));
   }
-  document.querySelectorAll(".tab[data-page]").forEach(button => button.addEventListener("click", () => changePage(button.dataset.page)));
+  document.querySelectorAll(".tab[data-page]").forEach(button => button.addEventListener("click", async () => {
+    changePage(button.dataset.page);
+    if (button.dataset.page === "statistics") { try { await loadStatistics(); } catch (error) { showMessage("No se pudieron cargar las estadísticas: " + error.message, "error"); } }
+  }));
 
   function initializeSupabase() {
     if (!window.supabase || typeof window.supabase.createClient !== "function") {
@@ -551,6 +602,79 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
   $("filterButton").addEventListener("click", async () => {
     try { await loadRecords(); } catch (error) { showMessage(error.message, "error"); }
   });
+
+  const monthNames = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+  function fillStatsFilters() {
+    const years = [...new Set([new Date().getFullYear(), ...statsRecords.map(r => Number(r.year))])].sort((a,b) => b-a);
+    const yearValue = $("statsYear").value;
+    const compareValue = $("statsCompareYear").value;
+    const yearOptions = years.map(y => `<option value="${y}">${y}</option>`).join("");
+    $("statsYear").innerHTML = yearOptions;
+    $("statsCompareYear").innerHTML = '<option value="">Sin comparación</option>' + yearOptions;
+    $("statsYear").value = years.includes(Number(yearValue)) ? yearValue : String(years[0]);
+    $("statsCompareYear").value = years.includes(Number(compareValue)) ? compareValue : "";
+    const clinicValue = $("statsClinic").value;
+    $("statsClinic").innerHTML = '<option value="">Todas las clínicas</option>' + clinics.map(c => `<option value="${c.id}">${escapeHTML(c.name)}</option>`).join("");
+    $("statsClinic").value = clinicValue;
+    const selected = [...$("statsEmployees").selectedOptions].map(o => o.value);
+    $("statsEmployees").innerHTML = employees.map(e => `<option value="${e.id}">${escapeHTML(e.full_name)}</option>`).join("");
+    [...$("statsEmployees").options].forEach(o => o.selected = selected.includes(o.value));
+  }
+  async function loadStatistics() {
+    const {data,error} = await db.from("monthly_records").select("*").order("year",{ascending:true}).order("month",{ascending:true});
+    if (error) throw new Error(error.message);
+    statsRecords = data || [];
+    fillStatsFilters();
+    renderStatistics();
+  }
+  function filteredStats(year) {
+    const clinicId = $("statsClinic").value;
+    const employeeIds = [...$("statsEmployees").selectedOptions].map(o => o.value);
+    return statsRecords.filter(r => Number(r.year) === Number(year) && (!clinicId || r.clinic_id === clinicId) && (!employeeIds.length || employeeIds.includes(r.employee_id)));
+  }
+  function sumStats(rows) {
+    return rows.reduce((a,r) => { a.therapy += Number(r.therapy_production||0); a.classes += Number(r.group_classes_production||0); a.objective += Number(r.objective||0); a.hours += Number(r.hours_worked||0); a.total += Number(r.therapy_production||0)+Number(r.group_classes_production||0); return a; }, {therapy:0,classes:0,objective:0,hours:0,total:0});
+  }
+  function svgLineChart(mainRows, compareRows) {
+    const main = monthNames.map((_,i) => mainRows.filter(r => Number(r.month) === i+1).reduce((v,r)=>v+Number(r.therapy_production||0)+Number(r.group_classes_production||0),0));
+    const compare = compareRows ? monthNames.map((_,i) => compareRows.filter(r => Number(r.month) === i+1).reduce((v,r)=>v+Number(r.therapy_production||0)+Number(r.group_classes_production||0),0)) : null;
+    const max = Math.max(1,...main,...(compare||[])); const W=720,H=260,L=58,R=16,T=18,B=38;
+    const x=i=>L+i*(W-L-R)/11, y=v=>H-B-(v/max)*(H-T-B);
+    const grid = [0,.25,.5,.75,1].map(f=>{const yy=y(max*f);return `<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" stroke="#e5ebe7"/><text x="${L-8}" y="${yy+4}" text-anchor="end" font-size="10" fill="#78847e">${Math.round(max*f).toLocaleString("es-ES")}</text>`}).join("");
+    const path = arr => arr.map((v,i)=>(i?"L":"M")+x(i)+","+y(v)).join(" ");
+    const dots = (arr,color)=>arr.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="3.5" fill="${color}"/>`).join("");
+    const labels=monthNames.map((m,i)=>`<text x="${x(i)}" y="${H-12}" text-anchor="middle" font-size="10" fill="#78847e">${m}</text>`).join("");
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gráfico de evolución mensual">${grid}<path d="${path(main)}" fill="none" stroke="#173f35" stroke-width="3" stroke-linejoin="round"/>${dots(main,"#173f35")}${compare?`<path d="${path(compare)}" fill="none" stroke="#d6b65c" stroke-width="3" stroke-linejoin="round"/>${dots(compare,"#d6b65c")}`:""}${labels}</svg>`;
+  }
+  function renderCategoryChart(t) {
+    const total=t.therapy+t.classes;
+    if (!total) return '<div class="empty">No hay producción para los filtros seleccionados.</div>';
+    const p1=t.therapy/total*100, p2=t.classes/total*100;
+    return `<div style="height:16px;display:flex;border-radius:10px;overflow:hidden;background:#edf1ee;margin:18px 0"><span style="width:${p1}%;background:#173f35"></span><span style="width:${p2}%;background:#d6b65c"></span></div><p><strong>Terapia:</strong> ${euro(t.therapy)} · ${p1.toFixed(1).replace(".",",")}%</p><p><strong>Clases colectivas:</strong> ${euro(t.classes)} · ${p2.toFixed(1).replace(".",",")}%</p>`;
+  }
+  function renderEmployeeChart(rows) {
+    const totals = new Map();
+    rows.forEach(r=>totals.set(r.employee_id,(totals.get(r.employee_id)||0)+Number(r.therapy_production||0)+Number(r.group_classes_production||0)));
+    const list=[...totals.entries()].map(([id,total])=>({name:employees.find(e=>e.id===id)?.full_name||"Fisioterapeuta",total})).sort((a,b)=>b.total-a.total);
+    if(!list.length) return '<div class="empty">No hay registros para este año.</div>';
+    const max=Math.max(1,...list.map(x=>x.total));
+    return list.map((x,i)=>`<div style="margin:12px 0"><div style="display:flex;justify-content:space-between;gap:8px;font-size:13px"><strong>${i+1}. ${escapeHTML(x.name)}</strong><span>${euro(x.total)}</span></div><div class="stat-bar"><span style="width:${x.total/max*100}%"></span></div></div>`).join("");
+  }
+  function renderStatistics() {
+    const year=Number($("statsYear").value), compareYear=$("statsCompareYear").value;
+    const rows=filteredStats(year), totals=sumStats(rows), compareRows=compareYear?filteredStats(Number(compareYear)):null, compareTotals=compareRows?sumStats(compareRows):null;
+    $("statProduction").textContent=euro(totals.total);
+    $("statObjective").textContent=euro(totals.objective);
+    $("statAchievement").textContent=totals.objective>0?(totals.total/totals.objective*100).toFixed(1).replace(".",",")+"%":"—";
+    $("statHourly").textContent=totals.hours>0?euro(totals.total/totals.hours)+"/h":"—";
+    $("monthlyChart").innerHTML=svgLineChart(rows,compareRows);
+    $("compareLegend").hidden=!compareRows;
+    $("categoryChart").innerHTML=renderCategoryChart(totals);
+    $("employeeChart").innerHTML=renderEmployeeChart(rows);
+    if(compareTotals){const diff=totals.total-compareTotals.total;const pct=compareTotals.total>0?diff/compareTotals.total*100:null;$("annualComparisonText").textContent=`Comparación de ${year} frente a ${compareYear}.`;$("annualComparison").innerHTML=`<div class="grid"><div><div class="item-sub">${year}</div><div class="record-total">${euro(totals.total)}</div></div><div><div class="item-sub">${compareYear}</div><div class="record-total">${euro(compareTotals.total)}</div></div></div><p><strong>Diferencia:</strong> ${diff>=0?"+":"−"}${euro(Math.abs(diff))}${pct===null?"":" ("+(pct>=0?"+":"")+pct.toFixed(1).replace(".",",")+"%)"}</p>`;}else{$("annualComparisonText").textContent=`Resumen de ${year}. Selecciona otro año para comparar.`;$("annualComparison").innerHTML=`<p><strong>Terapia:</strong> ${euro(totals.therapy)} · <strong>Clases colectivas:</strong> ${euro(totals.classes)}</p><p><strong>Horas trabajadas:</strong> ${totals.hours.toLocaleString("es-ES")}</p>`;}
+  }
+  ["statsYear","statsCompareYear","statsClinic","statsEmployees"].forEach(id=>$(id).addEventListener("change",renderStatistics));
+  $("refreshStats").addEventListener("click",async()=>{try{await loadStatistics();showMessage("Estadísticas actualizadas.");}catch(error){showMessage("No se pudieron actualizar las estadísticas: "+error.message,"error");}});
 
   async function boot() {
     try {
