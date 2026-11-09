@@ -3,7 +3,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Productividad FAMED</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -15,170 +15,87 @@
   --text:#26332e;
   --muted:#78847e;
   --border:#e3e9e5;
-  --gold:#d6b65c;
   --red:#b94c4c;
+  --gold:#d6b65c;
 }
-* { box-sizing:border-box; }
-body {
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:var(--bg);
-  color:var(--text);
-}
+* {box-sizing:border-box}
+body {margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
 header {
-  background:var(--green);
-  color:white;
-  padding:20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
+  background:var(--green);color:white;padding:18px 20px;
+  display:flex;justify-content:space-between;align-items:center;gap:12px
 }
-header h1 { margin:0; font-size:21px; letter-spacing:.5px; }
-header small { color:#d9e5df; }
+header h1 {margin:0;font-size:20px}
+header small {color:#d9e5df}
+button {cursor:pointer;font-size:14px}
 #logout {
-  background:transparent;
-  border:1px solid #ffffff66;
-  color:white;
-  padding:9px 12px;
-  border-radius:8px;
+  background:transparent;border:1px solid #ffffff66;color:white;
+  padding:9px 12px;border-radius:8px
 }
-main {
-  max-width:950px;
-  margin:24px auto;
-  padding:0 16px 40px;
-}
-.tabs {
-  display:flex;
-  gap:8px;
-  margin-bottom:22px;
-  overflow-x:auto;
-}
+main {max-width:1050px;margin:22px auto;padding:0 15px 40px}
+.tabs {display:flex;gap:8px;margin-bottom:20px;overflow-x:auto}
 .tab {
-  border:1px solid var(--border);
-  background:white;
-  color:var(--muted);
-  border-radius:9px;
-  padding:12px 16px;
-  font-weight:600;
-  white-space:nowrap;
+  border:1px solid var(--border);background:white;color:var(--muted);
+  border-radius:9px;padding:12px 15px;font-weight:600;white-space:nowrap
 }
-.tab.active {
-  background:var(--green);
-  color:white;
-  border-color:var(--green);
-}
-.tab:disabled { opacity:.4; }
+.tab.active {background:var(--green);color:white;border-color:var(--green)}
+.tab:disabled {opacity:.4}
 .panel {
-  background:white;
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:20px;
-  margin-bottom:18px;
+  background:white;border:1px solid var(--border);
+  border-radius:14px;padding:19px;margin-bottom:17px
 }
-.panel h2 { margin:0 0 7px; font-size:19px; }
-.description {
-  color:var(--muted);
-  font-size:14px;
-  line-height:1.5;
-  margin:0 0 18px;
+h2 {font-size:19px;margin:0 0 7px}
+.description {color:var(--muted);font-size:13px;line-height:1.5;margin:0 0 17px}
+label {display:block;font-size:13px;font-weight:600;margin:13px 0 7px}
+input,select {
+  width:100%;padding:12px;border:1px solid var(--border);
+  border-radius:8px;background:white;font-size:15px;color:var(--text)
 }
-label {
-  display:block;
-  font-size:13px;
-  font-weight:600;
-  margin:14px 0 7px;
-}
-input {
-  width:100%;
-  padding:13px;
-  border:1px solid var(--border);
-  border-radius:8px;
-  font-size:15px;
-  background:white;
-}
-button { cursor:pointer; font-size:14px; }
 .primary {
-  background:var(--green);
-  color:white;
-  border:0;
-  border-radius:8px;
-  padding:12px 17px;
-  font-weight:600;
+  background:var(--green);color:white;border:0;border-radius:8px;
+  padding:12px 17px;font-weight:600
 }
 .secondary {
-  background:white;
-  border:1px solid var(--border);
-  color:var(--text);
-  border-radius:8px;
-  padding:9px 12px;
+  background:white;border:1px solid var(--border);color:var(--text);
+  border-radius:8px;padding:9px 12px
 }
-.danger {
-  color:var(--red);
-  border-color:#e7caca;
-}
-.actions {
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  margin-top:16px;
-}
+.danger {color:var(--red);border-color:#e7caca}
+.actions {display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.grid {display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
 .item {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  padding:15px 0;
-  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;padding:14px 0;border-bottom:1px solid var(--border)
 }
-.item:last-child { border-bottom:0; }
-.item-name { font-weight:600; }
-.item-status {
-  font-size:12px;
-  color:var(--green2);
-  margin-top:5px;
-}
-.item-status.inactive { color:var(--red); }
-.item-actions {
-  display:flex;
-  gap:7px;
-  flex-wrap:wrap;
-  justify-content:flex-end;
-}
-.empty {
-  text-align:center;
-  color:var(--muted);
-  padding:24px 8px;
-  font-size:14px;
-}
-#login {
-  max-width:400px;
-  margin:70px auto;
-  padding:24px;
-}
-#login h1 { color:var(--green); }
-#app { display:none; }
+.item:last-child {border-bottom:0}
+.item-name {font-weight:600}
+.item-sub {font-size:12px;color:var(--muted);margin-top:5px}
+.item-actions {display:flex;gap:7px;flex-wrap:wrap}
+.status {font-size:12px;color:var(--green2);margin-top:5px}
+.status.inactive {color:var(--red)}
+.count {font-size:13px;color:var(--muted);margin-bottom:8px}
+.empty {text-align:center;color:var(--muted);padding:22px 8px;font-size:14px}
+#login {max-width:400px;margin:65px auto;padding:24px}
+#login h1 {color:var(--green)}
+#app {display:none}
 #message {
-  display:none;
-  padding:12px;
-  border-radius:8px;
-  margin-bottom:15px;
-  font-size:14px;
+  display:none;padding:12px;border-radius:8px;margin-bottom:15px;font-size:14px
 }
-#message.error { display:block; background:#fff0f0; color:#a33; }
-#message.success { display:block; background:#edf7f0; color:#245b39; }
-.count {
-  color:var(--muted);
-  font-size:13px;
-  margin-bottom:8px;
+#message.error {background:#fff0f0;color:#a33}
+#message.success {background:#edf7f0;color:#245b39}
+.total-box {
+  background:#edf4f0;border-radius:10px;padding:14px;margin-top:15px
 }
-@media(max-width:520px) {
-  header { padding:16px; }
-  header h1 { font-size:18px; }
-  main { margin-top:16px; }
-  .panel { padding:16px; }
-  .item { align-items:flex-start; flex-direction:column; }
-  .item-actions { justify-content:flex-start; }
+.total-box strong {font-size:23px;color:var(--green)}
+.total-box small {display:block;color:var(--muted);margin-bottom:5px}
+.record-total {font-weight:700;color:var(--green)}
+.note {font-size:12px;color:var(--muted);line-height:1.5}
+@media(max-width:600px) {
+  header {padding:15px}
+  header h1 {font-size:17px}
+  main {margin-top:15px}
+  .panel {padding:15px}
+  .grid {grid-template-columns:1fr}
+  .item {align-items:flex-start;flex-direction:column}
+  .item-actions {justify-content:flex-start}
 }
 </style>
 </head>
@@ -187,7 +104,7 @@ button { cursor:pointer; font-size:14px; }
 <section id="login" class="panel">
   <h1>PRODUCTIVIDAD FAMED</h1>
   <p class="description">Acceso privado de administración</p>
-  <div id="loginMessage"></div>
+  <div id="loginMessage" class="note"></div>
   <form id="loginForm">
     <label>Correo electrónico</label>
     <input id="email" type="email" required autocomplete="username">
@@ -212,28 +129,27 @@ button { cursor:pointer; font-size:14px; }
     <nav class="tabs">
       <button class="tab" data-page="clinics">Clínicas</button>
       <button class="tab" data-page="employees">Fisioterapeutas</button>
-      <button class="tab" disabled>Producción</button>
+      <button class="tab active" data-page="production">Producción</button>
       <button class="tab" disabled>Estadísticas</button>
     </nav>
 
     <div id="message"></div>
 
-    <section id="clinicsPage">
+    <section id="clinicsPage" hidden>
       <div class="panel">
         <h2 id="clinicFormTitle">Añadir clínica</h2>
         <p class="description">Registra las clínicas en las que se contabilizará la producción.</p>
         <form id="clinicForm">
           <label>Nombre de la clínica</label>
-          <input id="clinicName" required maxlength="100" placeholder="Ej. FAMED Coslada">
+          <input id="clinicName" required maxlength="100">
           <label>Dirección (opcional)</label>
-          <input id="clinicAddress" maxlength="200" placeholder="Dirección de la clínica">
+          <input id="clinicAddress" maxlength="200">
           <div class="actions">
             <button class="primary" type="submit" id="clinicSave">Guardar clínica</button>
             <button class="secondary" type="button" id="clinicCancel" hidden>Cancelar</button>
           </div>
         </form>
       </div>
-
       <div class="panel">
         <h2>Clínicas registradas</h2>
         <div id="clinicCount" class="count"></div>
@@ -244,24 +160,133 @@ button { cursor:pointer; font-size:14px; }
     <section id="employeesPage" hidden>
       <div class="panel">
         <h2 id="employeeFormTitle">Añadir fisioterapeuta</h2>
-        <p class="description">
-          Cada fisioterapeuta tendrá una única ficha, aunque trabaje en varias clínicas.
-        </p>
+        <p class="description">Cada fisioterapeuta tendrá una única ficha, aunque trabaje en varias clínicas.</p>
         <form id="employeeForm">
           <label>Nombre y apellidos</label>
-          <input id="employeeName" required maxlength="120"
-                 placeholder="Ej. Nombre Apellido Apellido">
+          <input id="employeeName" required maxlength="120">
           <div class="actions">
             <button class="primary" type="submit" id="employeeSave">Guardar fisioterapeuta</button>
             <button class="secondary" type="button" id="employeeCancel" hidden>Cancelar</button>
           </div>
         </form>
       </div>
-
       <div class="panel">
         <h2>Fisioterapeutas registrados</h2>
         <div id="employeeCount" class="count"></div>
         <div id="employeeList"></div>
+      </div>
+    </section>
+
+    <section id="productionPage">
+      <div class="panel">
+        <h2 id="recordFormTitle">Introducir producción mensual</h2>
+        <p class="description">
+          Registra la producción de un fisioterapeuta en una clínica durante un mes.
+          Puedes introducir meses anteriores, el actual o futuros.
+        </p>
+
+        <form id="recordForm">
+          <div class="grid">
+            <div>
+              <label>Clínica</label>
+              <select id="recordClinic" required></select>
+            </div>
+            <div>
+              <label>Fisioterapeuta</label>
+              <select id="recordEmployee" required></select>
+            </div>
+            <div>
+              <label>Mes</label>
+              <select id="recordMonth" required>
+                <option value="1">Enero</option>
+                <option value="2">Febrero</option>
+                <option value="3">Marzo</option>
+                <option value="4">Abril</option>
+                <option value="5">Mayo</option>
+                <option value="6">Junio</option>
+                <option value="7">Julio</option>
+                <option value="8">Agosto</option>
+                <option value="9">Septiembre</option>
+                <option value="10">Octubre</option>
+                <option value="11">Noviembre</option>
+                <option value="12">Diciembre</option>
+              </select>
+            </div>
+            <div>
+              <label>Año</label>
+              <input id="recordYear" type="number" min="2000" max="2100" required>
+            </div>
+            <div>
+              <label>Producción de terapia (€)</label>
+              <input id="therapy" type="number" min="0" step="0.01" value="0" required>
+            </div>
+            <div>
+              <label>Producción de clases colectivas (€)</label>
+              <input id="classes" type="number" min="0" step="0.01" value="0" required>
+            </div>
+            <div>
+              <label>Objetivo mensual (€)</label>
+              <input id="objective" type="number" min="0" step="0.01" value="0" required>
+            </div>
+            <div>
+              <label>Horas trabajadas</label>
+              <input id="hours" type="number" min="0" step="0.01" value="0" required>
+            </div>
+          </div>
+
+          <div class="total-box">
+            <small>Producción total calculada automáticamente</small>
+            <strong id="liveTotal">0,00 €</strong>
+          </div>
+
+          <p class="note">
+            Si ya existe un registro para esa combinación de clínica, fisioterapeuta,
+            mes y año, se actualizarán sus datos en lugar de crear uno duplicado.
+          </p>
+
+          <div class="actions">
+            <button class="primary" type="submit" id="recordSave">Guardar producción</button>
+            <button class="secondary" type="button" id="recordCancel" hidden>Cancelar edición</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h2>Consultar producción registrada</h2>
+        <p class="description">Selecciona un mes y año para consultar los registros de todas las clínicas.</p>
+        <div class="grid">
+          <div>
+            <label>Mes de consulta</label>
+            <select id="filterMonth">
+              <option value="1">Enero</option>
+              <option value="2">Febrero</option>
+              <option value="3">Marzo</option>
+              <option value="4">Abril</option>
+              <option value="5">Mayo</option>
+              <option value="6">Junio</option>
+              <option value="7">Julio</option>
+              <option value="8">Agosto</option>
+              <option value="9">Septiembre</option>
+              <option value="10">Octubre</option>
+              <option value="11">Noviembre</option>
+              <option value="12">Diciembre</option>
+            </select>
+          </div>
+          <div>
+            <label>Año de consulta</label>
+            <input id="filterYear" type="number" min="2000" max="2100">
+          </div>
+        </div>
+        <div class="actions">
+          <button class="primary" type="button" id="filterButton">Consultar</button>
+        </div>
+        <div class="total-box">
+          <small>Producción total del periodo consultado</small>
+          <strong id="periodTotal">0,00 €</strong>
+          <p class="note" id="periodDetails"></p>
+        </div>
+        <div id="recordCount" class="count" style="margin-top:16px"></div>
+        <div id="recordList"></div>
       </div>
     </section>
   </main>
@@ -276,18 +301,17 @@ const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let currentUser = null;
 let clinics = [];
 let employees = [];
+let records = [];
 let editingClinicId = null;
 let editingEmployeeId = null;
+let editingRecordId = null;
 
 const $ = id => document.getElementById(id);
 
-function showMessage(message, type = "success") {
-  const box = $("message");
-  box.textContent = message;
-  box.className = type;
-  box.style.display = "block";
-  window.scrollTo({ top: 0, behavior: "smooth" });
-  setTimeout(() => { box.style.display = "none"; }, 4500);
+function euro(value) {
+  return Number(value || 0).toLocaleString("es-ES", {
+    style:"currency", currency:"EUR"
+  });
 }
 
 function escapeHTML(value) {
@@ -295,6 +319,15 @@ function escapeHTML(value) {
     "&":"&amp;", "<":"&lt;", ">":"&gt;",
     '"':"&quot;", "'":"&#039;"
   })[char]);
+}
+
+function showMessage(message, type = "success") {
+  const box = $("message");
+  box.textContent = message;
+  box.className = type;
+  box.style.display = "block";
+  window.scrollTo({top:0,behavior:"smooth"});
+  setTimeout(() => {box.style.display="none";}, 4500);
 }
 
 function showApp() {
@@ -307,8 +340,22 @@ function showLogin() {
   $("login").style.display = "block";
 }
 
+function changePage(page) {
+  $("clinicsPage").hidden = page !== "clinics";
+  $("employeesPage").hidden = page !== "employees";
+  $("productionPage").hidden = page !== "production";
+
+  document.querySelectorAll(".tab[data-page]").forEach(tab => {
+    tab.classList.toggle("active", tab.dataset.page === page);
+  });
+}
+
+document.querySelectorAll(".tab[data-page]").forEach(button => {
+  button.addEventListener("click", () => changePage(button.dataset.page));
+});
+
 async function startApp() {
-  const { data, error } = await db.auth.getSession();
+  const {data,error} = await db.auth.getSession();
   if (error) {
     $("loginMessage").textContent = error.message;
     return;
@@ -316,19 +363,25 @@ async function startApp() {
   if (data.session) {
     currentUser = data.session.user;
     showApp();
-    await loadClinics();
-    await loadEmployees();
+    await loadAll();
   } else {
     showLogin();
   }
 }
 
+async function loadAll() {
+  await loadClinics();
+  await loadEmployees();
+  updateSelects();
+  await loadRecords();
+}
+
 $("loginForm").addEventListener("submit", async event => {
   event.preventDefault();
   $("loginMessage").textContent = "Comprobando acceso...";
-  const { data, error } = await db.auth.signInWithPassword({
-    email: $("email").value.trim(),
-    password: $("password").value
+  const {data,error} = await db.auth.signInWithPassword({
+    email:$("email").value.trim(),
+    password:$("password").value
   });
   if (error) {
     $("loginMessage").textContent = "No se pudo iniciar sesión: " + error.message;
@@ -337,282 +390,199 @@ $("loginForm").addEventListener("submit", async event => {
   currentUser = data.user;
   $("loginMessage").textContent = "";
   showApp();
-  await loadClinics();
-  await loadEmployees();
+  await loadAll();
 });
 
 $("logout").addEventListener("click", async () => {
-  const { error } = await db.auth.signOut();
-  if (error) {
-    showMessage(error.message, "error");
-    return;
-  }
+  const {error} = await db.auth.signOut();
+  if (error) return showMessage(error.message,"error");
   currentUser = null;
   showLogin();
 });
 
-db.auth.onAuthStateChange((event, session) => {
+db.auth.onAuthStateChange(event => {
   if (event === "SIGNED_OUT") {
     currentUser = null;
     showLogin();
   }
 });
 
-document.querySelectorAll(".tab[data-page]").forEach(button => {
-  button.addEventListener("click", () => {
-    const page = button.dataset.page;
-    $("clinicsPage").hidden = page !== "clinics";
-    $("employeesPage").hidden = page !== "employees";
-    document.querySelectorAll(".tab[data-page]").forEach(tab => {
-      tab.classList.toggle("active", tab === button);
-    });
-  });
-});
-
 async function loadClinics() {
-  const { data, error } = await db
-    .from("clinics")
-    .select("*")
-    .order("name");
-
-  if (error) {
-    showMessage("Error al cargar las clínicas: " + error.message, "error");
-    return;
-  }
-
+  const {data,error} = await db.from("clinics").select("*").order("name");
+  if (error) return showMessage("Error al cargar clínicas: "+error.message,"error");
   clinics = data || [];
   renderClinics();
 }
 
 function renderClinics() {
-  const active = clinics.filter(c => c.active).length;
-  $("clinicCount").textContent = `${clinics.length} clínicas · ${active} activas`;
+  $("clinicCount").textContent =
+    `${clinics.length} clínicas · ${clinics.filter(c=>c.active).length} activas`;
 
   if (!clinics.length) {
-    $("clinicList").innerHTML = '<div class="empty">Todavía no hay clínicas registradas.</div>';
+    $("clinicList").innerHTML='<div class="empty">Todavía no hay clínicas.</div>';
     return;
   }
 
-  $("clinicList").innerHTML = clinics.map(c => `
+  $("clinicList").innerHTML=clinics.map(c=>`
     <div class="item">
       <div>
         <div class="item-name">${escapeHTML(c.name)}</div>
-        <div class="description" style="margin:5px 0 0">
-          ${escapeHTML(c.address || "Sin dirección indicada")}
-        </div>
-        <div class="item-status ${c.active ? "" : "inactive"}">
-          ${c.active ? "Activa" : "Inactiva"}
-        </div>
+        <div class="item-sub">${escapeHTML(c.address || "Sin dirección indicada")}</div>
+        <div class="status ${c.active?"":"inactive"}">${c.active?"Activa":"Inactiva"}</div>
       </div>
       <div class="item-actions">
         <button class="secondary" data-edit-clinic="${c.id}">Editar</button>
         <button class="secondary" data-toggle-clinic="${c.id}">
-          ${c.active ? "Desactivar" : "Activar"}
+          ${c.active?"Desactivar":"Activar"}
         </button>
       </div>
-    </div>
-  `).join("");
+    </div>`).join("");
 
-  document.querySelectorAll("[data-edit-clinic]").forEach(button => {
-    button.addEventListener("click", () => editClinic(button.dataset.editClinic));
-  });
-  document.querySelectorAll("[data-toggle-clinic]").forEach(button => {
-    button.addEventListener("click", () => toggleClinic(button.dataset.toggleClinic));
-  });
+  document.querySelectorAll("[data-edit-clinic]").forEach(b=>
+    b.addEventListener("click",()=>editClinic(b.dataset.editClinic)));
+  document.querySelectorAll("[data-toggle-clinic]").forEach(b=>
+    b.addEventListener("click",()=>toggleClinic(b.dataset.toggleClinic)));
 }
 
-$("clinicForm").addEventListener("submit", async event => {
+$("clinicForm").addEventListener("submit",async event=>{
   event.preventDefault();
-  const name = $("clinicName").value.trim();
-  const address = $("clinicAddress").value.trim();
+  const name=$("clinicName").value.trim();
+  const address=$("clinicAddress").value.trim();
+  $("clinicSave").disabled=true;
 
-  if (!name) return;
+  const result=editingClinicId
+    ? await db.from("clinics").update({name,address}).eq("id",editingClinicId)
+    : await db.from("clinics").insert({name,address,owner_id:currentUser.id});
 
-  $("clinicSave").disabled = true;
-
-  let result;
-  if (editingClinicId) {
-    result = await db.from("clinics")
-      .update({ name, address })
-      .eq("id", editingClinicId);
-  } else {
-    result = await db.from("clinics")
-      .insert({ name, address, owner_id: currentUser.id });
-  }
-
-  $("clinicSave").disabled = false;
-
-  if (result.error) {
-    showMessage("No se pudo guardar la clínica: " + result.error.message, "error");
-    return;
-  }
+  $("clinicSave").disabled=false;
+  if(result.error) return showMessage("Error: "+result.error.message,"error");
 
   resetClinicForm();
   await loadClinics();
-  showMessage(editingClinicId ? "Clínica actualizada." : "Clínica añadida.");
+  updateSelects();
+  showMessage("Clínica guardada correctamente.");
 });
 
 function editClinic(id) {
-  const clinic = clinics.find(c => c.id === id);
-  if (!clinic) return;
-  editingClinicId = id;
-  $("clinicName").value = clinic.name;
-  $("clinicAddress").value = clinic.address || "";
-  $("clinicFormTitle").textContent = "Editar clínica";
-  $("clinicSave").textContent = "Guardar cambios";
-  $("clinicCancel").hidden = false;
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  const c=clinics.find(x=>x.id===id);
+  if(!c)return;
+  editingClinicId=id;
+  $("clinicName").value=c.name;
+  $("clinicAddress").value=c.address||"";
+  $("clinicFormTitle").textContent="Editar clínica";
+  $("clinicSave").textContent="Guardar cambios";
+  $("clinicCancel").hidden=false;
+  changePage("clinics");
+  window.scrollTo({top:0,behavior:"smooth"});
 }
 
 function resetClinicForm() {
-  editingClinicId = null;
+  editingClinicId=null;
   $("clinicForm").reset();
-  $("clinicFormTitle").textContent = "Añadir clínica";
-  $("clinicSave").textContent = "Guardar clínica";
-  $("clinicCancel").hidden = true;
+  $("clinicFormTitle").textContent="Añadir clínica";
+  $("clinicSave").textContent="Guardar clínica";
+  $("clinicCancel").hidden=true;
 }
-
-$("clinicCancel").addEventListener("click", resetClinicForm);
+$("clinicCancel").addEventListener("click",resetClinicForm);
 
 async function toggleClinic(id) {
-  const clinic = clinics.find(c => c.id === id);
-  if (!clinic) return;
-
-  const { error } = await db.from("clinics")
-    .update({ active: !clinic.active })
-    .eq("id", id);
-
-  if (error) {
-    showMessage("No se pudo cambiar el estado: " + error.message, "error");
-    return;
-  }
-
+  const c=clinics.find(x=>x.id===id);
+  if(!c)return;
+  const {error}=await db.from("clinics").update({active:!c.active}).eq("id",id);
+  if(error)return showMessage(error.message,"error");
   await loadClinics();
-  showMessage(clinic.active ? "Clínica desactivada." : "Clínica activada.");
+  updateSelects();
+  showMessage(c.active?"Clínica desactivada.":"Clínica activada.");
 }
 
 async function loadEmployees() {
-  const { data, error } = await db
-    .from("employees")
-    .select("*")
-    .order("full_name");
-
-  if (error) {
-    showMessage("Error al cargar los fisioterapeutas: " + error.message, "error");
-    return;
-  }
-
-  employees = data || [];
+  const {data,error}=await db.from("employees").select("*").order("full_name");
+  if(error)return showMessage("Error al cargar fisioterapeutas: "+error.message,"error");
+  employees=data||[];
   renderEmployees();
 }
 
 function renderEmployees() {
-  const active = employees.filter(e => e.active).length;
-  $("employeeCount").textContent =
-    `${employees.length} fisioterapeutas · ${active} activos`;
+  $("employeeCount").textContent=
+    `${employees.length} fisioterapeutas · ${employees.filter(e=>e.active).length} activos`;
 
-  if (!employees.length) {
-    $("employeeList").innerHTML =
-      '<div class="empty">Todavía no hay fisioterapeutas registrados.</div>';
+  if(!employees.length) {
+    $("employeeList").innerHTML='<div class="empty">Todavía no hay fisioterapeutas.</div>';
     return;
   }
 
-  $("employeeList").innerHTML = employees.map(e => `
+  $("employeeList").innerHTML=employees.map(e=>`
     <div class="item">
       <div>
         <div class="item-name">${escapeHTML(e.full_name)}</div>
-        <div class="item-status ${e.active ? "" : "inactive"}">
-          ${e.active ? "Activo" : "Inactivo"}
-        </div>
+        <div class="status ${e.active?"":"inactive"}">${e.active?"Activo":"Inactivo"}</div>
       </div>
       <div class="item-actions">
         <button class="secondary" data-edit-employee="${e.id}">Editar</button>
         <button class="secondary" data-toggle-employee="${e.id}">
-          ${e.active ? "Desactivar" : "Activar"}
+          ${e.active?"Desactivar":"Activar"}
         </button>
       </div>
-    </div>
-  `).join("");
+    </div>`).join("");
 
-  document.querySelectorAll("[data-edit-employee]").forEach(button => {
-    button.addEventListener("click", () => editEmployee(button.dataset.editEmployee));
-  });
-  document.querySelectorAll("[data-toggle-employee]").forEach(button => {
-    button.addEventListener("click", () => toggleEmployee(button.dataset.toggleEmployee));
-  });
+  document.querySelectorAll("[data-edit-employee]").forEach(b=>
+    b.addEventListener("click",()=>editEmployee(b.dataset.editEmployee)));
+  document.querySelectorAll("[data-toggle-employee]").forEach(b=>
+    b.addEventListener("click",()=>toggleEmployee(b.dataset.toggleEmployee)));
 }
 
-$("employeeForm").addEventListener("submit", async event => {
+$("employeeForm").addEventListener("submit",async event=>{
   event.preventDefault();
-  const full_name = $("employeeName").value.trim();
-  if (!full_name) return;
+  const full_name=$("employeeName").value.trim();
+  $("employeeSave").disabled=true;
 
-  $("employeeSave").disabled = true;
+  const result=editingEmployeeId
+    ? await db.from("employees").update({full_name}).eq("id",editingEmployeeId)
+    : await db.from("employees").insert({full_name,owner_id:currentUser.id});
 
-  let result;
-  if (editingEmployeeId) {
-    result = await db.from("employees")
-      .update({ full_name })
-      .eq("id", editingEmployeeId);
-  } else {
-    result = await db.from("employees")
-      .insert({ full_name, owner_id: currentUser.id });
-  }
-
-  $("employeeSave").disabled = false;
-
-  if (result.error) {
-    showMessage("No se pudo guardar el fisioterapeuta: " + result.error.message, "error");
-    return;
-  }
+  $("employeeSave").disabled=false;
+  if(result.error)return showMessage("Error: "+result.error.message,"error");
 
   resetEmployeeForm();
   await loadEmployees();
-  showMessage(editingEmployeeId ? "Fisioterapeuta actualizado." : "Fisioterapeuta añadido.");
+  updateSelects();
+  showMessage("Fisioterapeuta guardado correctamente.");
 });
 
 function editEmployee(id) {
-  const employee = employees.find(e => e.id === id);
-  if (!employee) return;
-
-  editingEmployeeId = id;
-  $("employeeName").value = employee.full_name;
-  $("employeeFormTitle").textContent = "Editar fisioterapeuta";
-  $("employeeSave").textContent = "Guardar cambios";
-  $("employeeCancel").hidden = false;
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  const e=employees.find(x=>x.id===id);
+  if(!e)return;
+  editingEmployeeId=id;
+  $("employeeName").value=e.full_name;
+  $("employeeFormTitle").textContent="Editar fisioterapeuta";
+  $("employeeSave").textContent="Guardar cambios";
+  $("employeeCancel").hidden=false;
+  changePage("employees");
+  window.scrollTo({top:0,behavior:"smooth"});
 }
 
 function resetEmployeeForm() {
-  editingEmployeeId = null;
+  editingEmployeeId=null;
   $("employeeForm").reset();
-  $("employeeFormTitle").textContent = "Añadir fisioterapeuta";
-  $("employeeSave").textContent = "Guardar fisioterapeuta";
-  $("employeeCancel").hidden = true;
+  $("employeeFormTitle").textContent="Añadir fisioterapeuta";
+  $("employeeSave").textContent="Guardar fisioterapeuta";
+  $("employeeCancel").hidden=true;
 }
-
-$("employeeCancel").addEventListener("click", resetEmployeeForm);
+$("employeeCancel").addEventListener("click",resetEmployeeForm);
 
 async function toggleEmployee(id) {
-  const employee = employees.find(e => e.id === id);
-  if (!employee) return;
-
-  const { error } = await db.from("employees")
-    .update({ active: !employee.active })
-    .eq("id", id);
-
-  if (error) {
-    showMessage("No se pudo cambiar el estado: " + error.message, "error");
-    return;
-  }
-
+  const e=employees.find(x=>x.id===id);
+  if(!e)return;
+  const {error}=await db.from("employees").update({active:!e.active}).eq("id",id);
+  if(error)return showMessage(error.message,"error");
   await loadEmployees();
-  showMessage(employee.active
-    ? "Fisioterapeuta desactivado."
-    : "Fisioterapeuta activado.");
+  updateSelects();
+  showMessage(e.active?"Fisioterapeuta desactivado.":"Fisioterapeuta activado.");
 }
 
-startApp();
-</script>
-</body>
-</html>
+function updateSelects() {
+  const oldClinic=$("recordClinic").value;
+  const oldEmployee=$("recordEmployee").value;
+
+  const activeClinics=clinics.filter(c=>c.active);
+  const act
