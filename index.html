@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#173f35">
 <title>Productividad FAMED</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{--green:#173f35;--green2:#245849;--bg:#f4f6f5;--white:#fff;--text:#26332e;--muted:#78847e;--border:#e3e9e5;--red:#a33;--gold:#d6b65c}
 *{box-sizing:border-box}
@@ -202,6 +203,9 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
     <p>Descarga un archivo con todos los datos de tus clínicas, fisioterapeutas y registros de producción.</p>
     <button class="primary" type="button" id="createBackup">
       Descargar copia de seguridad
+    </button>
+    <button class="secondary" type="button" id="exportExcel" style="margin-top:10px">
+  Exportar datos a Excel
     </button>
   </div>
 
@@ -720,6 +724,269 @@ async function fetchAllOwnedRows(table) {
   return allRows;
 }
 
+  function excelSheet(workbook, name, headers, rows, widths) {
+  const sheet = XLSX.utils.json_to_sheet(rows, { header: headers });
+    const labels = {
+  clinic: "Clínica",
+  address: "Dirección",
+  active: "Activa",
+  year: "Año",
+  month: "Mes",
+  monthNumber: "Número de mes",
+  physiotherapist: "Fisioterapeuta",
+  therapy: "Terapia (€)",
+  groupClasses: "Clases colectivas (€)",
+  total: "Producción total (€)",
+  objective: "Objetivo (€)",
+  achievement: "Cumplimiento (%)",
+  hours: "Horas trabajadas",
+  productionPerHour: "Producción por hora (€)",
+  records: "N.º de registros"
+};
+
+XLSX.utils.sheet_add_aoa(
+  sheet,
+  [headers.map(h => labels[h] || h)],
+  { origin: "A1" }
+);
+
+  sheet["!cols"] = widths.map(width => ({ wch: width }));
+
+  const lastColumn = XLSX.utils.encode_col(headers.length - 1);
+  const lastRow = Math.max(1, rows.length + 1);
+
+  sheet["!autofilter"] = {
+    ref: `A1:${lastColumn}${lastRow}`
+  };
+
+  XLSX.utils.book_append_sheet(workbook, sheet, name);
+}
+
+$("exportExcel").addEventListener("click", async () => {
+  const button = $("exportExcel");
+
+  try {
+    button.disabled = true;
+    button.textContent = "Preparando Excel...";
+
+    if (!window.XLSX) {
+      throw new Error("No se ha podido cargar la biblioteca de Excel. Recarga la aplicación y vuelve a intentarlo.");
+    }
+
+    const [clinicRows, employeeRows, recordRows] = await Promise.all([
+      fetchAllOwnedRows("clinics"),
+      fetchAllOwnedRows("employees"),
+      fetchAllOwnedRows("monthly_records")
+    ]);
+
+    const clinicMap = new Map(clinicRows.map(c => [c.id, c]));
+    const employeeMap = new Map(employeeRows.map(e => [e.id, e]));
+
+    const months = [
+      "Enero", "Febrero", "Marzo", "Abril",
+      "Mayo", "Junio", "Julio", "Agosto",
+      "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ];
+
+    const detail = recordRows.map(r => {
+      const clinic = clinicMap.get(r.clinic_id);
+      const employee = employeeMap.get(r.employee_id);
+
+      const therapy = Number(r.therapy_production || 0);
+      const classes = Number(r.group_classes_production || 0);
+      const total = therapy + classes;
+      const objective = Number(r.objective || 0);
+      const hours = Number(r.hours_worked || 0);
+
+      return {
+        clinic: clinic?.name || "Clínica no encontrada",
+        year: Number(r.year),
+        monthNumber: Number(r.month),
+        month: months[Number(r.month) - 1] || "",
+        physiotherapist: employee?.full_name || "Fisioterapeuta no encontrado",
+        therapy,
+        groupClasses: classes,
+        total,
+        objective,
+        achievement: objective > 0 ? total / objective * 100 : null,
+        hours,
+        productionPerHour: hours > 0 ? total / hours : null
+      };
+    });
+
+    detail.sort((a, b) =>
+      a.clinic.localeCompare(b.clinic, "es") ||
+      a.year - b.year ||
+      a.monthNumber - b.monthNumber ||
+      a.physiotherapist.localeCompare(b.physiotherapist, "es")
+    );
+
+    const clinicSummary = new Map();
+    const employeeSummary = new Map();
+
+    detail.forEach(r => {
+      const clinicKey = [
+        r.clinic, r.year, r.monthNumber
+      ].join("|");
+
+      if (!clinicSummary.has(clinicKey)) {
+        clinicSummary.set(clinicKey, {
+          clinic: r.clinic,
+          year: r.year,
+          monthNumber: r.monthNumber,
+          month: r.month,
+          therapy: 0,
+          groupClasses: 0,
+          total: 0,
+          objective: 0,
+          hours: 0,
+          records: 0
+        });
+      }
+
+      const c = clinicSummary.get(clinicKey);
+      c.therapy += r.therapy;
+      c.groupClasses += r.groupClasses;
+      c.total += r.total;
+      c.objective += r.objective;
+      c.hours += r.hours;
+      c.records++;
+
+      const employeeKey = [
+        r.clinic, r.physiotherapist, r.year, r.monthNumber
+      ].join("|");
+
+      if (!employeeSummary.has(employeeKey)) {
+        employeeSummary.set(employeeKey, {
+          clinic: r.clinic,
+          physiotherapist: r.physiotherapist,
+          year: r.year,
+          monthNumber: r.monthNumber,
+          month: r.month,
+          therapy: 0,
+          groupClasses: 0,
+          total: 0,
+          objective: 0,
+          hours: 0,
+          records: 0
+        });
+      }
+
+      const e = employeeSummary.get(employeeKey);
+      e.therapy += r.therapy;
+      e.groupClasses += r.groupClasses;
+      e.total += r.total;
+      e.objective += r.objective;
+      e.hours += r.hours;
+      e.records++;
+    });
+
+    const clinicTotals = [...clinicSummary.values()]
+      .map(r => ({
+        ...r,
+        achievement: r.objective > 0 ? r.total / r.objective * 100 : null,
+        productionPerHour: r.hours > 0 ? r.total / r.hours : null
+      }))
+      .sort((a, b) =>
+        a.clinic.localeCompare(b.clinic, "es") ||
+        a.year - b.year ||
+        a.monthNumber - b.monthNumber
+      );
+
+    const employeeTotals = [...employeeSummary.values()]
+      .map(r => ({
+        ...r,
+        achievement: r.objective > 0 ? r.total / r.objective * 100 : null,
+        productionPerHour: r.hours > 0 ? r.total / r.hours : null
+      }))
+      .sort((a, b) =>
+        a.clinic.localeCompare(b.clinic, "es") ||
+        a.physiotherapist.localeCompare(b.physiotherapist, "es") ||
+        a.year - b.year ||
+        a.monthNumber - b.monthNumber
+      );
+
+    const workbook = XLSX.utils.book_new();
+
+    excelSheet(
+      workbook,
+      "Resumen clínicas",
+      ["clinic", "year", "month", "therapy", "groupClasses", "total", "objective", "achievement", "hours", "productionPerHour", "records"],
+      clinicTotals,
+      [28, 10, 15, 16, 18, 16, 16, 16, 12, 20, 12]
+    );
+
+    excelSheet(
+      workbook,
+      "Resumen fisioterapeutas",
+      ["clinic", "physiotherapist", "year", "month", "therapy", "groupClasses", "total", "objective", "achievement", "hours", "productionPerHour", "records"],
+      employeeTotals,
+      [26, 28, 10, 15, 16, 18, 16, 16, 16, 12, 20, 12]
+    );
+
+    excelSheet(
+      workbook,
+      "Detalle producción",
+      ["clinic", "year", "monthNumber", "month", "physiotherapist", "therapy", "groupClasses", "total", "objective", "achievement", "hours", "productionPerHour"],
+      detail,
+      [26, 10, 12, 15, 28, 16, 18, 16, 16, 16, 12, 20]
+    );
+
+    const clinicsForExcel = clinicRows
+      .map(c => ({
+        clinic: c.name,
+        address: c.address || "",
+        active: c.active ? "Sí" : "No"
+      }))
+      .sort((a, b) => a.clinic.localeCompare(b.clinic, "es"));
+
+    excelSheet(
+      workbook,
+      "Clínicas",
+      ["clinic", "address", "active"],
+      clinicsForExcel,
+      [30, 40, 12]
+    );
+
+    const employeesForExcel = employeeRows
+      .map(e => ({
+        physiotherapist: e.full_name,
+        active: e.active ? "Sí" : "No"
+      }))
+      .sort((a, b) => a.physiotherapist.localeCompare(b.physiotherapist, "es"));
+
+    excelSheet(
+      workbook,
+      "Fisioterapeutas",
+      ["physiotherapist", "active"],
+      employeesForExcel,
+      [35, 12]
+    );
+
+    const now = new Date();
+    const pad = value => String(value).padStart(2, "0");
+
+    const timestamp =
+      now.getFullYear() + "-" +
+      pad(now.getMonth() + 1) + "-" +
+      pad(now.getDate()) + "_" +
+      pad(now.getHours()) + "-" +
+      pad(now.getMinutes()) + "-" +
+      pad(now.getSeconds());
+
+    XLSX.writeFile(
+      workbook,
+      "Productividad_FAMED_" + timestamp + ".xlsx"
+    );
+
+    alert("Excel exportado correctamente.");
+  } catch (error) {
+    alert("No se pudo exportar el Excel: " + error.message);
+  } finally {
+    button.disabled = false;
+    button.textContent = "Exportar datos a Excel";
+  }
+});
 $("createBackup").addEventListener("click", async () => {
   const button = $("createBackup");
 
