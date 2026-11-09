@@ -1,802 +1,582 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#173f35">
 <title>Productividad FAMED</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root {
-  --green:#173f35;
-  --green2:#245849;
-  --bg:#f4f6f5;
-  --white:#fff;
-  --text:#26332e;
-  --muted:#78847e;
-  --border:#e3e9e5;
-  --red:#b94c4c;
-  --gold:#d6b65c;
-}
-* {box-sizing:border-box}
-body {margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
-header {
-  background:var(--green);color:white;padding:18px 20px;
-  display:flex;justify-content:space-between;align-items:center;gap:12px
-}
-header h1 {margin:0;font-size:20px}
-header small {color:#d9e5df}
-button {cursor:pointer;font-size:14px}
-#logout {
-  background:transparent;border:1px solid #ffffff66;color:white;
-  padding:9px 12px;border-radius:8px
-}
-main {max-width:1050px;margin:22px auto;padding:0 15px 40px}
-.tabs {display:flex;gap:8px;margin-bottom:20px;overflow-x:auto}
-.tab {
-  border:1px solid var(--border);background:white;color:var(--muted);
-  border-radius:9px;padding:12px 15px;font-weight:600;white-space:nowrap
-}
-.tab.active {background:var(--green);color:white;border-color:var(--green)}
-.tab:disabled {opacity:.4}
-.panel {
-  background:white;border:1px solid var(--border);
-  border-radius:14px;padding:19px;margin-bottom:17px
-}
-h2 {font-size:19px;margin:0 0 7px}
-.description {color:var(--muted);font-size:13px;line-height:1.5;margin:0 0 17px}
-label {display:block;font-size:13px;font-weight:600;margin:13px 0 7px}
-input,select {
-  width:100%;padding:12px;border:1px solid var(--border);
-  border-radius:8px;background:white;font-size:15px;color:var(--text)
-}
-.primary {
-  background:var(--green);color:white;border:0;border-radius:8px;
-  padding:12px 17px;font-weight:600
-}
-.secondary {
-  background:white;border:1px solid var(--border);color:var(--text);
-  border-radius:8px;padding:9px 12px
-}
-.danger {color:var(--red);border-color:#e7caca}
-.actions {display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
-.grid {display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
-.item {
-  display:flex;align-items:center;justify-content:space-between;
-  gap:12px;padding:14px 0;border-bottom:1px solid var(--border)
-}
-.item:last-child {border-bottom:0}
-.item-name {font-weight:600}
-.item-sub {font-size:12px;color:var(--muted);margin-top:5px}
-.item-actions {display:flex;gap:7px;flex-wrap:wrap}
-.status {font-size:12px;color:var(--green2);margin-top:5px}
-.status.inactive {color:var(--red)}
-.count {font-size:13px;color:var(--muted);margin-bottom:8px}
-.empty {text-align:center;color:var(--muted);padding:22px 8px;font-size:14px}
-#login {max-width:400px;margin:65px auto;padding:24px}
-#login h1 {color:var(--green)}
-#app {display:none}
-#message {
-  display:none;padding:12px;border-radius:8px;margin-bottom:15px;font-size:14px
-}
-#message.error {background:#fff0f0;color:#a33}
-#message.success {background:#edf7f0;color:#245b39}
-.total-box {
-  background:#edf4f0;border-radius:10px;padding:14px;margin-top:15px
-}
-.total-box strong {font-size:23px;color:var(--green)}
-.total-box small {display:block;color:var(--muted);margin-bottom:5px}
-.record-total {font-weight:700;color:var(--green)}
-.note {font-size:12px;color:var(--muted);line-height:1.5}
-@media(max-width:600px) {
-  header {padding:15px}
-  header h1 {font-size:17px}
-  main {margin-top:15px}
-  .panel {padding:15px}
-  .grid {grid-template-columns:1fr}
-  .item {align-items:flex-start;flex-direction:column}
-  .item-actions {justify-content:flex-start}
-}
+:root{--green:#173f35;--green2:#245849;--bg:#f4f6f5;--white:#fff;--text:#26332e;--muted:#78847e;--border:#e3e9e5;--red:#a33;--gold:#d6b65c}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
+header{background:var(--green);color:#fff;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+header h1{margin:0;font-size:20px}header small{color:#d9e5df}
+button{cursor:pointer;font-size:14px}button:disabled{opacity:.55;cursor:wait}
+#logout{background:transparent;border:1px solid #ffffff66;color:#fff;padding:9px 12px;border-radius:8px}
+main{max-width:1050px;margin:22px auto;padding:0 15px 40px}
+.panel{background:#fff;border:1px solid var(--border);border-radius:14px;padding:19px;margin-bottom:17px}
+#login{max-width:420px;margin:65px auto;padding:24px}
+#login h1{color:var(--green);font-size:22px}
+h2{font-size:19px;margin:0 0 7px}
+.description{color:var(--muted);font-size:13px;line-height:1.5;margin:0 0 17px}
+label{display:block;font-size:13px;font-weight:600;margin:13px 0 7px}
+input,select{width:100%;padding:12px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:15px;color:var(--text)}
+.primary{background:var(--green);color:#fff;border:0;border-radius:8px;padding:12px 17px;font-weight:600}
+.secondary{background:#fff;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 12px}
+.danger{color:var(--red);border-color:#e7caca}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.tabs{display:flex;gap:8px;margin-bottom:20px;overflow-x:auto}
+.tab{border:1px solid var(--border);background:#fff;color:var(--muted);border-radius:9px;padding:12px 15px;font-weight:600;white-space:nowrap}
+.tab.active{background:var(--green);color:#fff;border-color:var(--green)}
+.tab:disabled{opacity:.4}
+.item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)}
+.item:last-child{border-bottom:0}
+.item-name{font-weight:600}.item-sub{font-size:12px;color:var(--muted);margin-top:5px}
+.item-actions{display:flex;gap:7px;flex-wrap:wrap}
+.status{font-size:12px;color:var(--green2);margin-top:5px}.status.inactive{color:var(--red)}
+.count{font-size:13px;color:var(--muted);margin-bottom:8px}
+.empty{text-align:center;color:var(--muted);padding:22px 8px;font-size:14px}
+.note{font-size:12px;color:var(--muted);line-height:1.5}
+#loginMessage{margin-top:12px;white-space:pre-wrap}
+#message{display:none;padding:12px;border-radius:8px;margin-bottom:15px;font-size:14px;white-space:pre-wrap}
+#message.error,#loginMessage.error{background:#fff0f0;color:#933;padding:10px;border-radius:8px}
+#message.success{background:#edf7f0;color:#245b39}
+.total-box{background:#edf4f0;border-radius:10px;padding:14px;margin-top:15px}
+.total-box strong{font-size:23px;color:var(--green)}
+.total-box small{display:block;color:var(--muted);margin-bottom:5px}
+.record-total{font-weight:700;color:var(--green);margin-top:7px}
+[hidden]{display:none!important}
+@media(max-width:600px){header{padding:15px}header h1{font-size:17px}main{margin-top:15px}.panel{padding:15px}.grid{grid-template-columns:1fr}.item{align-items:flex-start;flex-direction:column}.item-actions{justify-content:flex-start}}
 </style>
 </head>
 <body>
-
 <section id="login" class="panel">
   <h1>PRODUCTIVIDAD FAMED</h1>
   <p class="description">Acceso privado de administración</p>
-  <div id="loginMessage" class="note"></div>
   <form id="loginForm">
-    <label>Correo electrónico</label>
+    <label for="email">Correo electrónico</label>
     <input id="email" type="email" required autocomplete="username">
-    <label>Contraseña</label>
+    <label for="password">Contraseña</label>
     <input id="password" type="password" required autocomplete="current-password">
-    <div class="actions">
-      <button class="primary" type="submit">Iniciar sesión</button>
-    </div>
+    <div class="actions"><button class="primary" type="submit" id="loginButton">Iniciar sesión</button></div>
   </form>
+  <div id="loginMessage" class="note" role="status" aria-live="polite"></div>
 </section>
 
-<div id="app">
-  <header>
-    <div>
-      <h1>PRODUCTIVIDAD FAMED</h1>
-      <small>Panel de administración</small>
-    </div>
-    <button id="logout">Cerrar sesión</button>
-  </header>
+<div id="app" hidden>
+<header>
+  <div><h1>PRODUCTIVIDAD FAMED</h1><small>Panel de administración</small></div>
+  <button id="logout" type="button">Cerrar sesión</button>
+</header>
+<main>
+  <nav class="tabs">
+    <button class="tab active" data-page="clinics" type="button">Clínicas</button>
+    <button class="tab" data-page="employees" type="button">Fisioterapeutas</button>
+    <button class="tab" data-page="production" type="button">Producción</button>
+    <button class="tab" type="button" disabled>Estadísticas</button>
+  </nav>
+  <div id="message" role="status" aria-live="polite"></div>
 
-  <main>
-    <nav class="tabs">
-      <button class="tab" data-page="clinics">Clínicas</button>
-      <button class="tab" data-page="employees">Fisioterapeutas</button>
-      <button class="tab active" data-page="production">Producción</button>
-      <button class="tab" disabled>Estadísticas</button>
-    </nav>
-
-    <div id="message"></div>
-
-    <section id="clinicsPage" hidden>
-      <div class="panel">
-        <h2 id="clinicFormTitle">Añadir clínica</h2>
-        <p class="description">Registra las clínicas en las que se contabilizará la producción.</p>
-        <form id="clinicForm">
-          <label>Nombre de la clínica</label>
-          <input id="clinicName" required maxlength="100">
-          <label>Dirección (opcional)</label>
-          <input id="clinicAddress" maxlength="200">
-          <div class="actions">
-            <button class="primary" type="submit" id="clinicSave">Guardar clínica</button>
-            <button class="secondary" type="button" id="clinicCancel" hidden>Cancelar</button>
-          </div>
-        </form>
-      </div>
-      <div class="panel">
-        <h2>Clínicas registradas</h2>
-        <div id="clinicCount" class="count"></div>
-        <div id="clinicList"></div>
-      </div>
-    </section>
-
-    <section id="employeesPage" hidden>
-      <div class="panel">
-        <h2 id="employeeFormTitle">Añadir fisioterapeuta</h2>
-        <p class="description">Cada fisioterapeuta tendrá una única ficha, aunque trabaje en varias clínicas.</p>
-        <form id="employeeForm">
-          <label>Nombre y apellidos</label>
-          <input id="employeeName" required maxlength="120">
-          <div class="actions">
-            <button class="primary" type="submit" id="employeeSave">Guardar fisioterapeuta</button>
-            <button class="secondary" type="button" id="employeeCancel" hidden>Cancelar</button>
-          </div>
-        </form>
-      </div>
-      <div class="panel">
-        <h2>Fisioterapeutas registrados</h2>
-        <div id="employeeCount" class="count"></div>
-        <div id="employeeList"></div>
-      </div>
-    </section>
-
-    <section id="productionPage">
-      <div class="panel">
-        <h2 id="recordFormTitle">Introducir producción mensual</h2>
-        <p class="description">
-          Registra la producción de un fisioterapeuta en una clínica durante un mes.
-          Puedes introducir meses anteriores, el actual o futuros.
-        </p>
-
-        <form id="recordForm">
-          <div class="grid">
-            <div>
-              <label>Clínica</label>
-              <select id="recordClinic" required></select>
-            </div>
-            <div>
-              <label>Fisioterapeuta</label>
-              <select id="recordEmployee" required></select>
-            </div>
-            <div>
-              <label>Mes</label>
-              <select id="recordMonth" required>
-                <option value="1">Enero</option>
-                <option value="2">Febrero</option>
-                <option value="3">Marzo</option>
-                <option value="4">Abril</option>
-                <option value="5">Mayo</option>
-                <option value="6">Junio</option>
-                <option value="7">Julio</option>
-                <option value="8">Agosto</option>
-                <option value="9">Septiembre</option>
-                <option value="10">Octubre</option>
-                <option value="11">Noviembre</option>
-                <option value="12">Diciembre</option>
-              </select>
-            </div>
-            <div>
-              <label>Año</label>
-              <input id="recordYear" type="number" min="2000" max="2100" required>
-            </div>
-            <div>
-              <label>Producción de terapia (€)</label>
-              <input id="therapy" type="number" min="0" step="0.01" value="0" required>
-            </div>
-            <div>
-              <label>Producción de clases colectivas (€)</label>
-              <input id="classes" type="number" min="0" step="0.01" value="0" required>
-            </div>
-            <div>
-              <label>Objetivo mensual (€)</label>
-              <input id="objective" type="number" min="0" step="0.01" value="0" required>
-            </div>
-            <div>
-              <label>Horas trabajadas</label>
-              <input id="hours" type="number" min="0" step="0.01" value="0" required>
-            </div>
-          </div>
-
-          <div class="total-box">
-            <small>Producción total calculada automáticamente</small>
-            <strong id="liveTotal">0,00 €</strong>
-          </div>
-
-          <p class="note">
-            Si ya existe un registro para esa combinación de clínica, fisioterapeuta,
-            mes y año, se actualizarán sus datos en lugar de crear uno duplicado.
-          </p>
-
-          <div class="actions">
-            <button class="primary" type="submit" id="recordSave">Guardar producción</button>
-            <button class="secondary" type="button" id="recordCancel" hidden>Cancelar edición</button>
-          </div>
-        </form>
-      </div>
-
-      <div class="panel">
-        <h2>Consultar producción registrada</h2>
-        <p class="description">Selecciona un mes y año para consultar los registros de todas las clínicas.</p>
-        <div class="grid">
-          <div>
-            <label>Mes de consulta</label>
-            <select id="filterMonth">
-              <option value="1">Enero</option>
-              <option value="2">Febrero</option>
-              <option value="3">Marzo</option>
-              <option value="4">Abril</option>
-              <option value="5">Mayo</option>
-              <option value="6">Junio</option>
-              <option value="7">Julio</option>
-              <option value="8">Agosto</option>
-              <option value="9">Septiembre</option>
-              <option value="10">Octubre</option>
-              <option value="11">Noviembre</option>
-              <option value="12">Diciembre</option>
-            </select>
-          </div>
-          <div>
-            <label>Año de consulta</label>
-            <input id="filterYear" type="number" min="2000" max="2100">
-          </div>
-        </div>
+  <section id="clinicsPage">
+    <div class="panel">
+      <h2 id="clinicFormTitle">Añadir clínica</h2>
+      <p class="description">Registra las clínicas en las que se contabilizará la producción.</p>
+      <form id="clinicForm">
+        <label for="clinicName">Nombre de la clínica</label><input id="clinicName" required maxlength="100">
+        <label for="clinicAddress">Dirección (opcional)</label><input id="clinicAddress" maxlength="200">
         <div class="actions">
-          <button class="primary" type="button" id="filterButton">Consultar</button>
+          <button class="primary" type="submit" id="clinicSave">Guardar clínica</button>
+          <button class="secondary" type="button" id="clinicCancel" hidden>Cancelar</button>
         </div>
-        <div class="total-box">
-          <small>Producción total del periodo consultado</small>
-          <strong id="periodTotal">0,00 €</strong>
-          <p class="note" id="periodDetails"></p>
+      </form>
+    </div>
+    <div class="panel"><h2>Clínicas registradas</h2><div id="clinicCount" class="count"></div><div id="clinicList"></div></div>
+  </section>
+
+  <section id="employeesPage" hidden>
+    <div class="panel">
+      <h2 id="employeeFormTitle">Añadir fisioterapeuta</h2>
+      <p class="description">Cada fisioterapeuta tendrá una única ficha, aunque trabaje en varias clínicas.</p>
+      <form id="employeeForm">
+        <label for="employeeName">Nombre y apellidos</label><input id="employeeName" required maxlength="120">
+        <div class="actions">
+          <button class="primary" type="submit" id="employeeSave">Guardar fisioterapeuta</button>
+          <button class="secondary" type="button" id="employeeCancel" hidden>Cancelar</button>
         </div>
-        <div id="recordCount" class="count" style="margin-top:16px"></div>
-        <div id="recordList"></div>
+      </form>
+    </div>
+    <div class="panel"><h2>Fisioterapeutas registrados</h2><div id="employeeCount" class="count"></div><div id="employeeList"></div></div>
+  </section>
+
+  <section id="productionPage" hidden>
+    <div class="panel">
+      <h2 id="recordFormTitle">Introducir producción mensual</h2>
+      <p class="description">Registra la producción de un fisioterapeuta en una clínica durante un mes. Puedes introducir meses anteriores, el actual o futuros.</p>
+      <form id="recordForm">
+        <div class="grid">
+          <div><label for="recordClinic">Clínica</label><select id="recordClinic" required></select></div>
+          <div><label for="recordEmployee">Fisioterapeuta</label><select id="recordEmployee" required></select></div>
+          <div><label for="recordMonth">Mes</label><select id="recordMonth" required>
+            <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+          </select></div>
+          <div><label for="recordYear">Año</label><input id="recordYear" type="number" min="2000" max="2100" required></div>
+          <div><label for="therapy">Producción de terapia (€)</label><input id="therapy" type="number" min="0" step="0.01" value="0" required></div>
+          <div><label for="classes">Producción de clases colectivas (€)</label><input id="classes" type="number" min="0" step="0.01" value="0" required></div>
+          <div><label for="objective">Objetivo mensual (€)</label><input id="objective" type="number" min="0" step="0.01" value="0" required></div>
+          <div><label for="hours">Horas trabajadas</label><input id="hours" type="number" min="0" step="0.01" value="0" required></div>
+        </div>
+        <div class="total-box"><small>Producción total calculada automáticamente</small><strong id="liveTotal">0,00 €</strong></div>
+        <p class="note">Si ya existe un registro para esa combinación de clínica, fisioterapeuta, mes y año, se actualizarán sus datos en lugar de crear uno duplicado.</p>
+        <div class="actions">
+          <button class="primary" type="submit" id="recordSave">Guardar producción</button>
+          <button class="secondary" type="button" id="recordCancel" hidden>Cancelar edición</button>
+        </div>
+      </form>
+    </div>
+    <div class="panel">
+      <h2>Consultar producción registrada</h2>
+      <p class="description">Selecciona un mes y año para consultar los registros de todas las clínicas.</p>
+      <div class="grid">
+        <div><label for="filterMonth">Mes de consulta</label><select id="filterMonth">
+          <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+        </select></div>
+        <div><label for="filterYear">Año de consulta</label><input id="filterYear" type="number" min="2000" max="2100"></div>
       </div>
-    </section>
-  </main>
+      <div class="actions"><button class="primary" type="button" id="filterButton">Consultar</button></div>
+      <div class="total-box"><small>Producción total del periodo consultado</small><strong id="periodTotal">0,00 €</strong><p class="note" id="periodDetails"></p></div>
+      <div id="recordCount" class="count" style="margin-top:16px"></div><div id="recordList"></div>
+    </div>
+  </section>
+</main>
 </div>
 
 <script>
-const SUPABASE_URL = "https://orokidiumerjlhwcpsej.supabase.co";
-const SUPABASE_KEY = "sb_publishable_le92S4ET4dt5c5vNvyXQmQ_jr_buC3X";
+(() => {
+  "use strict";
 
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  alert("JAVASCRIPT INICIADO CORRECTAMENTE");
+  // La clave publishable es apta para el navegador. La protección de datos depende de RLS en Supabase.
+  const SUPABASE_URL = "https://orokidiumerjlhwcpsej.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_le92S4ET4dt5c5vNvyXQmQ_jr_buC3X";
 
-let currentUser = null;
-let clinics = [];
-let employees = [];
-let records = [];
-let editingClinicId = null;
-let editingEmployeeId = null;
-let editingRecordId = null;
+  const $ = id => document.getElementById(id);
+  let db = null;
+  let currentUser = null;
+  let clinics = [];
+  let employees = [];
+  let records = [];
+  let editingClinicId = null;
+  let editingEmployeeId = null;
+  let editingRecordId = null;
 
-const $ = id => document.getElementById(id);
+  function loginMessage(message, isError = false) {
+    const box = $("loginMessage");
+    box.textContent = message || "";
+    box.className = isError ? "note error" : "note";
+  }
+  function showMessage(message, type = "success") {
+    const box = $("message");
+    box.textContent = message;
+    box.className = type;
+    box.style.display = "block";
+    window.scrollTo({top:0, behavior:"smooth"});
+    window.clearTimeout(showMessage.timer);
+    showMessage.timer = window.setTimeout(() => { box.style.display = "none"; }, 5000);
+  }
+  function euro(value) {
+    return Number(value || 0).toLocaleString("es-ES", {style:"currency",currency:"EUR"});
+  }
+  function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[ch]));
+  }
+  function showApp() {
+    $("login").hidden = true;
+    $("app").hidden = false;
+  }
+  function showLogin() {
+    $("app").hidden = true;
+    $("login").hidden = false;
+  }
+  function changePage(page) {
+    $("clinicsPage").hidden = page !== "clinics";
+    $("employeesPage").hidden = page !== "employees";
+    $("productionPage").hidden = page !== "production";
+    document.querySelectorAll(".tab[data-page]").forEach(tab => tab.classList.toggle("active", tab.dataset.page === page));
+  }
+  document.querySelectorAll(".tab[data-page]").forEach(button => button.addEventListener("click", () => changePage(button.dataset.page)));
 
-function euro(value) {
-  return Number(value || 0).toLocaleString("es-ES", {
-    style:"currency", currency:"EUR"
+  function initializeSupabase() {
+    if (!window.supabase || typeof window.supabase.createClient !== "function") {
+      throw new Error("No se ha podido cargar la biblioteca de conexión. Comprueba tu conexión a Internet y vuelve a cargar la página.");
+    }
+    if (!SUPABASE_URL.startsWith("https://") || !SUPABASE_URL.endsWith(".supabase.co") || !SUPABASE_KEY.startsWith("sb_publishable_")) {
+      throw new Error("La dirección o la clave pública de Supabase no tienen el formato esperado.");
+    }
+    db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  }
+
+  async function startApp() {
+    try {
+      const {data, error} = await db.auth.getSession();
+      if (error) throw error;
+      if (data.session) {
+        currentUser = data.session.user;
+        showApp();
+        await loadAll();
+      } else {
+        showLogin();
+      }
+    } catch (error) {
+      showLogin();
+      loginMessage("No se ha podido comprobar la sesión: " + (error.message || String(error)), true);
+    }
+  }
+
+  $("loginForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    if (!db) {
+      loginMessage("La conexión con Supabase no se ha inicializado. Recarga la página; si continúa, revisa que el CDN esté accesible.", true);
+      return;
+    }
+    const button = $("loginButton");
+    button.disabled = true;
+    button.textContent = "Comprobando...";
+    loginMessage("Comprobando acceso...");
+    try {
+      const {data, error} = await db.auth.signInWithPassword({
+        email: $("email").value.trim(),
+        password: $("password").value
+      });
+      if (error) throw error;
+      currentUser = data.user;
+      loginMessage("");
+      showApp();
+      await loadAll();
+    } catch (error) {
+      loginMessage("No se pudo iniciar sesión: " + (error.message || String(error)), true);
+    } finally {
+      button.disabled = false;
+      button.textContent = "Iniciar sesión";
+    }
   });
-}
 
-function escapeHTML(value) {
-  return String(value ?? "").replace(/[&<>"']/g, char => ({
-    "&":"&amp;", "<":"&lt;", ">":"&gt;",
-    '"':"&quot;", "'":"&#039;"
-  })[char]);
-}
-
-function showMessage(message, type = "success") {
-  const box = $("message");
-  box.textContent = message;
-  box.className = type;
-  box.style.display = "block";
-  window.scrollTo({top:0,behavior:"smooth"});
-  setTimeout(() => {box.style.display="none";}, 4500);
-}
-
-function showApp() {
-  $("login").style.display = "none";
-  $("app").style.display = "block";
-}
-
-function showLogin() {
-  $("app").style.display = "none";
-  $("login").style.display = "block";
-}
-
-function changePage(page) {
-  $("clinicsPage").hidden = page !== "clinics";
-  $("employeesPage").hidden = page !== "employees";
-  $("productionPage").hidden = page !== "production";
-
-  document.querySelectorAll(".tab[data-page]").forEach(tab => {
-    tab.classList.toggle("active", tab.dataset.page === page);
+  $("logout").addEventListener("click", async () => {
+    try {
+      const {error} = await db.auth.signOut();
+      if (error) throw error;
+      currentUser = null;
+      showLogin();
+    } catch (error) {
+      showMessage("No se pudo cerrar sesión: " + error.message, "error");
+    }
   });
-}
 
-document.querySelectorAll(".tab[data-page]").forEach(button => {
-  button.addEventListener("click", () => changePage(button.dataset.page));
-});
-
-async function startApp() {
-  const {data,error} = await db.auth.getSession();
-  if (error) {
-    $("loginMessage").textContent = error.message;
-    return;
-  }
-  if (data.session) {
-    currentUser = data.session.user;
-    showApp();
-    await loadAll();
-  } else {
-    showLogin();
-  }
-}
-
-async function loadAll() {
-  await loadClinics();
-  await loadEmployees();
-  updateSelects();
-  await loadRecords();
-}
-
-$("loginForm").addEventListener("submit", async event => {
-  event.preventDefault();
-  $("loginMessage").textContent = "Comprobando acceso...";
-  const {data,error} = await db.auth.signInWithPassword({
-    email:$("email").value.trim(),
-    password:$("password").value
-  });
-  if (error) {
-    $("loginMessage").textContent = "No se pudo iniciar sesión: " + error.message;
-    return;
-  }
-  currentUser = data.user;
-  $("loginMessage").textContent = "";
-  showApp();
-  await loadAll();
-});
-
-$("logout").addEventListener("click", async () => {
-  const {error} = await db.auth.signOut();
-  if (error) return showMessage(error.message,"error");
-  currentUser = null;
-  showLogin();
-});
-
-db.auth.onAuthStateChange(event => {
-  if (event === "SIGNED_OUT") {
-    currentUser = null;
-    showLogin();
-  }
-});
-
-async function loadClinics() {
-  const {data,error} = await db.from("clinics").select("*").order("name");
-  if (error) return showMessage("Error al cargar clínicas: "+error.message,"error");
-  clinics = data || [];
-  renderClinics();
-}
-
-function renderClinics() {
-  $("clinicCount").textContent =
-    `${clinics.length} clínicas · ${clinics.filter(c=>c.active).length} activas`;
-
-  if (!clinics.length) {
-    $("clinicList").innerHTML='<div class="empty">Todavía no hay clínicas.</div>';
-    return;
+  async function loadAll() {
+    await loadClinics();
+    await loadEmployees();
+    updateSelects();
+    await loadRecords();
   }
 
-  $("clinicList").innerHTML=clinics.map(c=>`
-    <div class="item">
-      <div>
+  async function loadClinics() {
+    const {data, error} = await db.from("clinics").select("*").order("name");
+    if (error) throw new Error("Error al cargar clínicas: " + error.message);
+    clinics = data || [];
+    renderClinics();
+  }
+  function renderClinics() {
+    $("clinicCount").textContent = `${clinics.length} clínicas · ${clinics.filter(c => c.active).length} activas`;
+    if (!clinics.length) {
+      $("clinicList").innerHTML = '<div class="empty">Todavía no hay clínicas.</div>';
+      return;
+    }
+    $("clinicList").innerHTML = clinics.map(c => `
+      <div class="item"><div>
         <div class="item-name">${escapeHTML(c.name)}</div>
         <div class="item-sub">${escapeHTML(c.address || "Sin dirección indicada")}</div>
-        <div class="status ${c.active?"":"inactive"}">${c.active?"Activa":"Inactiva"}</div>
-      </div>
-      <div class="item-actions">
-        <button class="secondary" data-edit-clinic="${c.id}">Editar</button>
-        <button class="secondary" data-toggle-clinic="${c.id}">
-          ${c.active?"Desactivar":"Activar"}
-        </button>
-      </div>
-    </div>`).join("");
-
-  document.querySelectorAll("[data-edit-clinic]").forEach(b=>
-    b.addEventListener("click",()=>editClinic(b.dataset.editClinic)));
-  document.querySelectorAll("[data-toggle-clinic]").forEach(b=>
-    b.addEventListener("click",()=>toggleClinic(b.dataset.toggleClinic)));
-}
-
-$("clinicForm").addEventListener("submit",async event=>{
-  event.preventDefault();
-  const name=$("clinicName").value.trim();
-  const address=$("clinicAddress").value.trim();
-  $("clinicSave").disabled=true;
-
-  const result=editingClinicId
-    ? await db.from("clinics").update({name,address}).eq("id",editingClinicId)
-    : await db.from("clinics").insert({name,address,owner_id:currentUser.id});
-
-  $("clinicSave").disabled=false;
-  if(result.error) return showMessage("Error: "+result.error.message,"error");
-
-  resetClinicForm();
-  await loadClinics();
-  updateSelects();
-  showMessage("Clínica guardada correctamente.");
-});
-
-function editClinic(id) {
-  const c=clinics.find(x=>x.id===id);
-  if(!c)return;
-  editingClinicId=id;
-  $("clinicName").value=c.name;
-  $("clinicAddress").value=c.address||"";
-  $("clinicFormTitle").textContent="Editar clínica";
-  $("clinicSave").textContent="Guardar cambios";
-  $("clinicCancel").hidden=false;
-  changePage("clinics");
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-
-function resetClinicForm() {
-  editingClinicId=null;
-  $("clinicForm").reset();
-  $("clinicFormTitle").textContent="Añadir clínica";
-  $("clinicSave").textContent="Guardar clínica";
-  $("clinicCancel").hidden=true;
-}
-$("clinicCancel").addEventListener("click",resetClinicForm);
-
-async function toggleClinic(id) {
-  const c=clinics.find(x=>x.id===id);
-  if(!c)return;
-  const {error}=await db.from("clinics").update({active:!c.active}).eq("id",id);
-  if(error)return showMessage(error.message,"error");
-  await loadClinics();
-  updateSelects();
-  showMessage(c.active?"Clínica desactivada.":"Clínica activada.");
-}
-
-async function loadEmployees() {
-  const {data,error}=await db.from("employees").select("*").order("full_name");
-  if(error)return showMessage("Error al cargar fisioterapeutas: "+error.message,"error");
-  employees=data||[];
-  renderEmployees();
-}
-
-function renderEmployees() {
-  $("employeeCount").textContent=
-    `${employees.length} fisioterapeutas · ${employees.filter(e=>e.active).length} activos`;
-
-  if(!employees.length) {
-    $("employeeList").innerHTML='<div class="empty">Todavía no hay fisioterapeutas.</div>';
-    return;
+        <div class="status ${c.active ? "" : "inactive"}">${c.active ? "Activa" : "Inactiva"}</div>
+      </div><div class="item-actions">
+        <button class="secondary" type="button" data-edit-clinic="${c.id}">Editar</button>
+        <button class="secondary" type="button" data-toggle-clinic="${c.id}">${c.active ? "Desactivar" : "Activar"}</button>
+      </div></div>`).join("");
+    document.querySelectorAll("[data-edit-clinic]").forEach(b => b.addEventListener("click", () => editClinic(b.dataset.editClinic)));
+    document.querySelectorAll("[data-toggle-clinic]").forEach(b => b.addEventListener("click", () => toggleClinic(b.dataset.toggleClinic)));
   }
-
-  $("employeeList").innerHTML=employees.map(e=>`
-    <div class="item">
-      <div>
-        <div class="item-name">${escapeHTML(e.full_name)}</div>
-        <div class="status ${e.active?"":"inactive"}">${e.active?"Activo":"Inactivo"}</div>
-      </div>
-      <div class="item-actions">
-        <button class="secondary" data-edit-employee="${e.id}">Editar</button>
-        <button class="secondary" data-toggle-employee="${e.id}">
-          ${e.active?"Desactivar":"Activar"}
-        </button>
-      </div>
-    </div>`).join("");
-
-  document.querySelectorAll("[data-edit-employee]").forEach(b=>
-    b.addEventListener("click",()=>editEmployee(b.dataset.editEmployee)));
-  document.querySelectorAll("[data-toggle-employee]").forEach(b=>
-    b.addEventListener("click",()=>toggleEmployee(b.dataset.toggleEmployee)));
-}
-
-$("employeeForm").addEventListener("submit",async event=>{
-  event.preventDefault();
-  const full_name=$("employeeName").value.trim();
-  $("employeeSave").disabled=true;
-
-  const result=editingEmployeeId
-    ? await db.from("employees").update({full_name}).eq("id",editingEmployeeId)
-    : await db.from("employees").insert({full_name,owner_id:currentUser.id});
-
-  $("employeeSave").disabled=false;
-  if(result.error)return showMessage("Error: "+result.error.message,"error");
-
-  resetEmployeeForm();
-  await loadEmployees();
-  updateSelects();
-  showMessage("Fisioterapeuta guardado correctamente.");
-});
-
-function editEmployee(id) {
-  const e=employees.find(x=>x.id===id);
-  if(!e)return;
-  editingEmployeeId=id;
-  $("employeeName").value=e.full_name;
-  $("employeeFormTitle").textContent="Editar fisioterapeuta";
-  $("employeeSave").textContent="Guardar cambios";
-  $("employeeCancel").hidden=false;
-  changePage("employees");
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-
-function resetEmployeeForm() {
-  editingEmployeeId=null;
-  $("employeeForm").reset();
-  $("employeeFormTitle").textContent="Añadir fisioterapeuta";
-  $("employeeSave").textContent="Guardar fisioterapeuta";
-  $("employeeCancel").hidden=true;
-}
-$("employeeCancel").addEventListener("click",resetEmployeeForm);
-
-async function toggleEmployee(id) {
-  const e=employees.find(x=>x.id===id);
-  if(!e)return;
-  const {error}=await db.from("employees").update({active:!e.active}).eq("id",id);
-  if(error)return showMessage(error.message,"error");
-  await loadEmployees();
-  updateSelects();
-  showMessage(e.active?"Fisioterapeuta desactivado.":"Fisioterapeuta activado.");
-}
-
-function updateSelects() {
-  const oldClinic=$("recordClinic").value;
-  const oldEmployee=$("recordEmployee").value;
-
-  const activeClinics=clinics.filter(c=>c.active);
-  
-const activeEmployees = employees.filter(e => e.active);
-
-  $("recordClinic").innerHTML =
-    '<option value="">Selecciona clínica</option>' +
-    activeClinics.map(c =>
-      `<option value="${c.id}">${escapeHTML(c.name)}</option>`
-    ).join("");
-
-  $("recordEmployee").innerHTML =
-    '<option value="">Selecciona fisioterapeuta</option>' +
-    activeEmployees.map(e =>
-      `<option value="${e.id}">${escapeHTML(e.full_name)}</option>`
-    ).join("");
-
-  if (activeClinics.some(c => c.id === oldClinic)) {
-    $("recordClinic").value = oldClinic;
-  }
-
-  if (activeEmployees.some(e => e.id === oldEmployee)) {
-    $("recordEmployee").value = oldEmployee;
-  }
-}
-
-function initializeDefaults() {
-  const now = new Date();
-  const month = now.getMonth() + 1;
-  const year = now.getFullYear();
-
-  $("recordMonth").value = String(month);
-  $("recordYear").value = year;
-  $("filterMonth").value = String(month);
-  $("filterYear").value = year;
-}
-
-async function loadRecords() {
-  const month = Number($("filterMonth").value);
-  const year = Number($("filterYear").value);
-
-  const { data, error } = await db
-    .from("monthly_records")
-    .select("*")
-    .eq("month", month)
-    .eq("year", year)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    showMessage("Error al cargar producción: " + error.message, "error");
-    return;
-  }
-
-  records = data || [];
-  renderRecords();
-}
-
-function renderRecords() {
-  const total = records.reduce(
-    (sum, r) => sum + Number(r.therapy_production || 0)
-      + Number(r.group_classes_production || 0), 0
-  );
-
-  $("periodTotal").textContent = euro(total);
-  $("recordCount").textContent =
-    records.length + (records.length === 1 ? " registro" : " registros");
-
-  $("periodDetails").textContent =
-    "Terapia y clases colectivas de todas las clínicas.";
-
-  if (!records.length) {
-    $("recordList").innerHTML =
-      '<div class="empty">No hay producción registrada en este periodo.</div>';
-    return;
-  }
-
-  $("recordList").innerHTML = records.map(r => {
-    const clinic = clinics.find(c => c.id === r.clinic_id);
-    const employee = employees.find(e => e.id === r.employee_id);
-    const therapy = Number(r.therapy_production || 0);
-    const classes = Number(r.group_classes_production || 0);
-    const production = therapy + classes;
-    const objective = Number(r.objective || 0);
-    const percentage = objective > 0
-      ? (production / objective) * 100
-      : null;
-
-    return `
-      <div class="item">
-        <div>
-          <div class="item-name">${escapeHTML(employee?.full_name || "Fisioterapeuta")}</div>
-          <div class="item-sub">${escapeHTML(clinic?.name || "Clínica")}</div>
-          <div class="item-sub">Terapia: ${euro(therapy)} · Clases: ${euro(classes)}</div>
-          <div class="record-total">${euro(production)}</div>
-          <div class="item-sub">
-            Objetivo: ${euro(objective)}
-            ${percentage === null ? "" : " · " + percentage.toFixed(1).replace(".", ",") + "%"}
-          </div>
-        </div>
-        <div class="item-actions">
-          <button class="secondary" data-edit-record="${r.id}">Editar</button>
-        </div>
-      </div>
-    `;
-  }).join("");
-
-  document.querySelectorAll("[data-edit-record]").forEach(button => {
-    button.addEventListener("click", () =>
-      editRecord(button.dataset.editRecord)
-    );
+  $("clinicForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    const name = $("clinicName").value.trim();
+    const address = $("clinicAddress").value.trim();
+    $("clinicSave").disabled = true;
+    try {
+      const result = editingClinicId
+        ? await db.from("clinics").update({name, address}).eq("id", editingClinicId)
+        : await db.from("clinics").insert({name, address, owner_id: currentUser.id});
+      if (result.error) throw result.error;
+      resetClinicForm();
+      await loadClinics();
+      updateSelects();
+      showMessage("Clínica guardada correctamente.");
+    } catch (error) {
+      showMessage("No se pudo guardar la clínica: " + error.message, "error");
+    } finally {
+      $("clinicSave").disabled = false;
+    }
   });
-}
-
-$("recordForm").addEventListener("submit", async event => {
-  event.preventDefault();
-
-  const clinicId = $("recordClinic").value;
-  const employeeId = $("recordEmployee").value;
-  const year = Number($("recordYear").value);
-  const month = Number($("recordMonth").value);
-
-  if (!clinicId || !employeeId) {
-    return showMessage("Selecciona una clínica y un fisioterapeuta.", "error");
+  function editClinic(id) {
+    const c = clinics.find(x => x.id === id);
+    if (!c) return;
+    editingClinicId = id;
+    $("clinicName").value = c.name;
+    $("clinicAddress").value = c.address || "";
+    $("clinicFormTitle").textContent = "Editar clínica";
+    $("clinicSave").textContent = "Guardar cambios";
+    $("clinicCancel").hidden = false;
+    changePage("clinics");
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+  function resetClinicForm() {
+    editingClinicId = null;
+    $("clinicForm").reset();
+    $("clinicFormTitle").textContent = "Añadir clínica";
+    $("clinicSave").textContent = "Guardar clínica";
+    $("clinicCancel").hidden = true;
+  }
+  $("clinicCancel").addEventListener("click", resetClinicForm);
+  async function toggleClinic(id) {
+    const c = clinics.find(x => x.id === id);
+    if (!c) return;
+    try {
+      const {error} = await db.from("clinics").update({active:!c.active}).eq("id", id);
+      if (error) throw error;
+      await loadClinics();
+      updateSelects();
+      showMessage(c.active ? "Clínica desactivada." : "Clínica activada.");
+    } catch (error) {
+      showMessage("No se pudo cambiar la clínica: " + error.message, "error");
+    }
   }
 
-  const record = {
-    owner_id: currentUser.id,
-    clinic_id: clinicId,
-    employee_id: employeeId,
-    year,
-    month,
-    therapy_production: Number($("therapy").value || 0),
-    group_classes_production: Number($("classes").value || 0),
-    objective: Number($("objective").value || 0),
-    hours_worked: Number($("hours").value || 0)
-  };
-
-  $("recordSave").disabled = true;
-
-  const result = editingRecordId
-    ? await db.from("monthly_records").update(record).eq("id", editingRecordId)
-    : await db.from("monthly_records").upsert(record, {
-        onConflict: "clinic_id,employee_id,year,month"
-      });
-
-  $("recordSave").disabled = false;
-
-  if (result.error) {
-    return showMessage("Error al guardar: " + result.error.message, "error");
+  async function loadEmployees() {
+    const {data, error} = await db.from("employees").select("*").order("full_name");
+    if (error) throw new Error("Error al cargar fisioterapeutas: " + error.message);
+    employees = data || [];
+    renderEmployees();
+  }
+  function renderEmployees() {
+    $("employeeCount").textContent = `${employees.length} fisioterapeutas · ${employees.filter(e => e.active).length} activos`;
+    if (!employees.length) {
+      $("employeeList").innerHTML = '<div class="empty">Todavía no hay fisioterapeutas.</div>';
+      return;
+    }
+    $("employeeList").innerHTML = employees.map(e => `
+      <div class="item"><div>
+        <div class="item-name">${escapeHTML(e.full_name)}</div>
+        <div class="status ${e.active ? "" : "inactive"}">${e.active ? "Activo" : "Inactivo"}</div>
+      </div><div class="item-actions">
+        <button class="secondary" type="button" data-edit-employee="${e.id}">Editar</button>
+        <button class="secondary" type="button" data-toggle-employee="${e.id}">${e.active ? "Desactivar" : "Activar"}</button>
+      </div></div>`).join("");
+    document.querySelectorAll("[data-edit-employee]").forEach(b => b.addEventListener("click", () => editEmployee(b.dataset.editEmployee)));
+    document.querySelectorAll("[data-toggle-employee]").forEach(b => b.addEventListener("click", () => toggleEmployee(b.dataset.toggleEmployee)));
+  }
+  $("employeeForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    const full_name = $("employeeName").value.trim();
+    $("employeeSave").disabled = true;
+    try {
+      const result = editingEmployeeId
+        ? await db.from("employees").update({full_name}).eq("id", editingEmployeeId)
+        : await db.from("employees").insert({full_name, owner_id: currentUser.id});
+      if (result.error) throw result.error;
+      resetEmployeeForm();
+      await loadEmployees();
+      updateSelects();
+      showMessage("Fisioterapeuta guardado correctamente.");
+    } catch (error) {
+      showMessage("No se pudo guardar el fisioterapeuta: " + error.message, "error");
+    } finally {
+      $("employeeSave").disabled = false;
+    }
+  });
+  function editEmployee(id) {
+    const e = employees.find(x => x.id === id);
+    if (!e) return;
+    editingEmployeeId = id;
+    $("employeeName").value = e.full_name;
+    $("employeeFormTitle").textContent = "Editar fisioterapeuta";
+    $("employeeSave").textContent = "Guardar cambios";
+    $("employeeCancel").hidden = false;
+    changePage("employees");
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+  function resetEmployeeForm() {
+    editingEmployeeId = null;
+    $("employeeForm").reset();
+    $("employeeFormTitle").textContent = "Añadir fisioterapeuta";
+    $("employeeSave").textContent = "Guardar fisioterapeuta";
+    $("employeeCancel").hidden = true;
+  }
+  $("employeeCancel").addEventListener("click", resetEmployeeForm);
+  async function toggleEmployee(id) {
+    const e = employees.find(x => x.id === id);
+    if (!e) return;
+    try {
+      const {error} = await db.from("employees").update({active:!e.active}).eq("id", id);
+      if (error) throw error;
+      await loadEmployees();
+      updateSelects();
+      showMessage(e.active ? "Fisioterapeuta desactivado." : "Fisioterapeuta activado.");
+    } catch (error) {
+      showMessage("No se pudo cambiar el fisioterapeuta: " + error.message, "error");
+    }
   }
 
-  resetRecordForm();
-  $("filterMonth").value = String(month);
-  $("filterYear").value = year;
+  function updateSelects() {
+    const oldClinic = $("recordClinic").value;
+    const oldEmployee = $("recordEmployee").value;
+    const activeClinics = clinics.filter(c => c.active);
+    const activeEmployees = employees.filter(e => e.active);
+    $("recordClinic").innerHTML = '<option value="">Selecciona clínica</option>' + activeClinics.map(c => `<option value="${c.id}">${escapeHTML(c.name)}</option>`).join("");
+    $("recordEmployee").innerHTML = '<option value="">Selecciona fisioterapeuta</option>' + activeEmployees.map(e => `<option value="${e.id}">${escapeHTML(e.full_name)}</option>`).join("");
+    if (activeClinics.some(c => c.id === oldClinic)) $("recordClinic").value = oldClinic;
+    if (activeEmployees.some(e => e.id === oldEmployee)) $("recordEmployee").value = oldEmployee;
+  }
 
-  await loadRecords();
-  showMessage("Producción guardada correctamente.");
-});
+  async function loadRecords() {
+    const month = Number($("filterMonth").value);
+    const year = Number($("filterYear").value);
+    const {data, error} = await db.from("monthly_records").select("*").eq("month", month).eq("year", year).order("created_at", {ascending:false});
+    if (error) throw new Error("Error al cargar producción: " + error.message);
+    records = data || [];
+    renderRecords();
+  }
+  function renderRecords() {
+    const total = records.reduce((sum, r) => sum + Number(r.therapy_production || 0) + Number(r.group_classes_production || 0), 0);
+    $("periodTotal").textContent = euro(total);
+    $("recordCount").textContent = `${records.length} ${records.length === 1 ? "registro" : "registros"}`;
+    $("periodDetails").textContent = "Terapia y clases colectivas de todas las clínicas.";
+    if (!records.length) {
+      $("recordList").innerHTML = '<div class="empty">No hay producción registrada en este periodo.</div>';
+      return;
+    }
+    $("recordList").innerHTML = records.map(r => {
+      const clinic = clinics.find(c => c.id === r.clinic_id);
+      const employee = employees.find(e => e.id === r.employee_id);
+      const therapy = Number(r.therapy_production || 0);
+      const classes = Number(r.group_classes_production || 0);
+      const production = therapy + classes;
+      const objective = Number(r.objective || 0);
+      const percentage = objective > 0 ? (production / objective) * 100 : null;
+      return `<div class="item"><div>
+        <div class="item-name">${escapeHTML(employee?.full_name || "Fisioterapeuta")}</div>
+        <div class="item-sub">${escapeHTML(clinic?.name || "Clínica")}</div>
+        <div class="item-sub">Terapia: ${euro(therapy)} · Clases: ${euro(classes)}</div>
+        <div class="record-total">${euro(production)}</div>
+        <div class="item-sub">Objetivo: ${euro(objective)}${percentage === null ? "" : " · " + percentage.toFixed(1).replace(".", ",") + "% del objetivo"}</div>
+      </div><div class="item-actions"><button class="secondary" type="button" data-edit-record="${r.id}">Editar</button></div></div>`;
+    }).join("");
+    document.querySelectorAll("[data-edit-record]").forEach(b => b.addEventListener("click", () => editRecord(b.dataset.editRecord)));
+  }
+  $("recordForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    const clinicId = $("recordClinic").value;
+    const employeeId = $("recordEmployee").value;
+    const year = Number($("recordYear").value);
+    const month = Number($("recordMonth").value);
+    if (!clinicId || !employeeId) {
+      showMessage("Selecciona una clínica y un fisioterapeuta.", "error");
+      return;
+    }
+    const record = {
+      owner_id: currentUser.id,
+      clinic_id: clinicId,
+      employee_id: employeeId,
+      year, month,
+      therapy_production: Number($("therapy").value || 0),
+      group_classes_production: Number($("classes").value || 0),
+      objective: Number($("objective").value || 0),
+      hours_worked: Number($("hours").value || 0)
+    };
+    $("recordSave").disabled = true;
+    try {
+      const result = editingRecordId
+        ? await db.from("monthly_records").update(record).eq("id", editingRecordId)
+        : await db.from("monthly_records").upsert(record, {onConflict:"clinic_id,employee_id,year,month"});
+      if (result.error) throw result.error;
+      resetRecordForm();
+      $("filterMonth").value = String(month);
+      $("filterYear").value = String(year);
+      await loadRecords();
+      showMessage("Producción guardada correctamente.");
+    } catch (error) {
+      showMessage("No se pudo guardar la producción: " + error.message, "error");
+    } finally {
+      $("recordSave").disabled = false;
+    }
+  });
+  function editRecord(id) {
+    const r = records.find(item => item.id === id);
+    if (!r) return;
+    editingRecordId = id;
+    $("recordClinic").value = r.clinic_id;
+    $("recordEmployee").value = r.employee_id;
+    $("recordMonth").value = String(r.month);
+    $("recordYear").value = r.year;
+    $("therapy").value = r.therapy_production;
+    $("classes").value = r.group_classes_production;
+    $("objective").value = r.objective;
+    $("hours").value = r.hours_worked;
+    $("recordFormTitle").textContent = "Editar producción mensual";
+    $("recordSave").textContent = "Guardar cambios";
+    $("recordCancel").hidden = false;
+    updateLiveTotal();
+    changePage("production");
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+  function resetRecordForm() {
+    editingRecordId = null;
+    $("recordForm").reset();
+    $("recordFormTitle").textContent = "Introducir producción mensual";
+    $("recordSave").textContent = "Guardar producción";
+    $("recordCancel").hidden = true;
+    updateLiveTotal();
+  }
+  $("recordCancel").addEventListener("click", resetRecordForm);
+  function updateLiveTotal() {
+    $("liveTotal").textContent = euro(Number($("therapy").value || 0) + Number($("classes").value || 0));
+  }
+  $("therapy").addEventListener("input", updateLiveTotal);
+  $("classes").addEventListener("input", updateLiveTotal);
+  $("filterButton").addEventListener("click", async () => {
+    try { await loadRecords(); } catch (error) { showMessage(error.message, "error"); }
+  });
 
-function editRecord(id) {
-  const r = records.find(item => item.id === id);
-  if (!r) return;
+  async function boot() {
+    try {
+      initializeSupabase();
+      const now = new Date();
+      $("recordMonth").value = String(now.getMonth() + 1);
+      $("recordYear").value = String(now.getFullYear());
+      $("filterMonth").value = String(now.getMonth() + 1);
+      $("filterYear").value = String(now.getFullYear());
+      updateLiveTotal();
+      await startApp();
+    } catch (error) {
+      showLogin();
+      loginMessage("Error al iniciar la aplicación: " + (error.message || String(error)), true);
+    }
+  }
 
-  editingRecordId = id;
+  db = null;
+  boot();
 
-  $("recordClinic").value = r.clinic_id;
-  $("recordEmployee").value = r.employee_id;
-  $("recordMonth").value = String(r.month);
-  $("recordYear").value = r.year;
-  $("therapy").value = r.therapy_production;
-  $("classes").value = r.group_classes_production;
-  $("objective").value = r.objective;
-  $("hours").value = r.hours_worked;
-
-  $("recordFormTitle").textContent = "Editar producción mensual";
-  $("recordSave").textContent = "Guardar cambios";
-  $("recordCancel").hidden = false;
-
-  updateLiveTotal();
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
-function resetRecordForm() {
-  editingRecordId = null;
-  $("recordForm").reset();
-
-  $("recordFormTitle").textContent = "Introducir producción mensual";
-  $("recordSave").textContent = "Guardar producción";
-  $("recordCancel").hidden = true;
-
-  updateLiveTotal();
-}
-
-$("recordCancel").addEventListener("click", resetRecordForm);
-
-function updateLiveTotal() {
-  const total =
-    Number($("therapy").value || 0) +
-    Number($("classes").value || 0);
-
-  $("liveTotal").textContent = euro(total);
-}
-
-$("therapy").addEventListener("input", updateLiveTotal);
-$("classes").addEventListener("input", updateLiveTotal);
-
-$("filterButton").addEventListener("click", loadRecords);
-
-initializeDefaults();
-updateLiveTotal();
-
-startApp().catch(error => {
-  $("loginMessage").textContent =
-    "Error al iniciar la aplicación: " + error.message;
-});
-  
+  window.addEventListener("unhandledrejection", event => {
+    const message = event.reason && event.reason.message ? event.reason.message : String(event.reason || "Error desconocido");
+    if (!$("app").hidden) showMessage("Se ha producido un error: " + message, "error");
+    else loginMessage("Se ha producido un error: " + message, true);
+  });
+})();
+</script>
+</body>
+</html>
