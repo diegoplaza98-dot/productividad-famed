@@ -585,4 +585,217 @@ function updateSelects() {
   const oldEmployee=$("recordEmployee").value;
 
   const activeClinics=clinics.filter(c=>c.active);
-  const act
+  
+iveEmployees = employees.filter(e => e.active);
+
+  $("recordClinic").innerHTML =
+    '<option value="">Selecciona clínica</option>' +
+    activeClinics.map(c =>
+      `<option value="${c.id}">${escapeHTML(c.name)}</option>`
+    ).join("");
+
+  $("recordEmployee").innerHTML =
+    '<option value="">Selecciona fisioterapeuta</option>' +
+    activeEmployees.map(e =>
+      `<option value="${e.id}">${escapeHTML(e.full_name)}</option>`
+    ).join("");
+
+  if (activeClinics.some(c => c.id === oldClinic)) {
+    $("recordClinic").value = oldClinic;
+  }
+
+  if (activeEmployees.some(e => e.id === oldEmployee)) {
+    $("recordEmployee").value = oldEmployee;
+  }
+}
+
+function initializeDefaults() {
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const year = now.getFullYear();
+
+  $("recordMonth").value = String(month);
+  $("recordYear").value = year;
+  $("filterMonth").value = String(month);
+  $("filterYear").value = year;
+}
+
+async function loadRecords() {
+  const month = Number($("filterMonth").value);
+  const year = Number($("filterYear").value);
+
+  const { data, error } = await db
+    .from("monthly_records")
+    .select("*")
+    .eq("month", month)
+    .eq("year", year)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    showMessage("Error al cargar producción: " + error.message, "error");
+    return;
+  }
+
+  records = data || [];
+  renderRecords();
+}
+
+function renderRecords() {
+  const total = records.reduce(
+    (sum, r) => sum + Number(r.therapy_production || 0)
+      + Number(r.group_classes_production || 0), 0
+  );
+
+  $("periodTotal").textContent = euro(total);
+  $("recordCount").textContent =
+    records.length + (records.length === 1 ? " registro" : " registros");
+
+  $("periodDetails").textContent =
+    "Terapia y clases colectivas de todas las clínicas.";
+
+  if (!records.length) {
+    $("recordList").innerHTML =
+      '<div class="empty">No hay producción registrada en este periodo.</div>';
+    return;
+  }
+
+  $("recordList").innerHTML = records.map(r => {
+    const clinic = clinics.find(c => c.id === r.clinic_id);
+    const employee = employees.find(e => e.id === r.employee_id);
+    const therapy = Number(r.therapy_production || 0);
+    const classes = Number(r.group_classes_production || 0);
+    const production = therapy + classes;
+    const objective = Number(r.objective || 0);
+    const percentage = objective > 0
+      ? (production / objective) * 100
+      : null;
+
+    return `
+      <div class="item">
+        <div>
+          <div class="item-name">${escapeHTML(employee?.full_name || "Fisioterapeuta")}</div>
+          <div class="item-sub">${escapeHTML(clinic?.name || "Clínica")}</div>
+          <div class="item-sub">Terapia: ${euro(therapy)} · Clases: ${euro(classes)}</div>
+          <div class="record-total">${euro(production)}</div>
+          <div class="item-sub">
+            Objetivo: ${euro(objective)}
+            ${percentage === null ? "" : " · " + percentage.toFixed(1).replace(".", ",") + "%"}
+          </div>
+        </div>
+        <div class="item-actions">
+          <button class="secondary" data-edit-record="${r.id}">Editar</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  document.querySelectorAll("[data-edit-record]").forEach(button => {
+    button.addEventListener("click", () =>
+      editRecord(button.dataset.editRecord)
+    );
+  });
+}
+
+$("recordForm").addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const clinicId = $("recordClinic").value;
+  const employeeId = $("recordEmployee").value;
+  const year = Number($("recordYear").value);
+  const month = Number($("recordMonth").value);
+
+  if (!clinicId || !employeeId) {
+    return showMessage("Selecciona una clínica y un fisioterapeuta.", "error");
+  }
+
+  const record = {
+    owner_id: currentUser.id,
+    clinic_id: clinicId,
+    employee_id: employeeId,
+    year,
+    month,
+    therapy_production: Number($("therapy").value || 0),
+    group_classes_production: Number($("classes").value || 0),
+    objective: Number($("objective").value || 0),
+    hours_worked: Number($("hours").value || 0)
+  };
+
+  $("recordSave").disabled = true;
+
+  const result = editingRecordId
+    ? await db.from("monthly_records").update(record).eq("id", editingRecordId)
+    : await db.from("monthly_records").upsert(record, {
+        onConflict: "clinic_id,employee_id,year,month"
+      });
+
+  $("recordSave").disabled = false;
+
+  if (result.error) {
+    return showMessage("Error al guardar: " + result.error.message, "error");
+  }
+
+  resetRecordForm();
+  $("filterMonth").value = String(month);
+  $("filterYear").value = year;
+
+  await loadRecords();
+  showMessage("Producción guardada correctamente.");
+});
+
+function editRecord(id) {
+  const r = records.find(item => item.id === id);
+  if (!r) return;
+
+  editingRecordId = id;
+
+  $("recordClinic").value = r.clinic_id;
+  $("recordEmployee").value = r.employee_id;
+  $("recordMonth").value = String(r.month);
+  $("recordYear").value = r.year;
+  $("therapy").value = r.therapy_production;
+  $("classes").value = r.group_classes_production;
+  $("objective").value = r.objective;
+  $("hours").value = r.hours_worked;
+
+  $("recordFormTitle").textContent = "Editar producción mensual";
+  $("recordSave").textContent = "Guardar cambios";
+  $("recordCancel").hidden = false;
+
+  updateLiveTotal();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function resetRecordForm() {
+  editingRecordId = null;
+  $("recordForm").reset();
+
+  $("recordFormTitle").textContent = "Introducir producción mensual";
+  $("recordSave").textContent = "Guardar producción";
+  $("recordCancel").hidden = true;
+
+  updateLiveTotal();
+}
+
+$("recordCancel").addEventListener("click", resetRecordForm);
+
+function updateLiveTotal() {
+  const total =
+    Number($("therapy").value || 0) +
+    Number($("classes").value || 0);
+
+  $("liveTotal").textContent = euro(total);
+}
+
+$("therapy").addEventListener("input", updateLiveTotal);
+$("classes").addEventListener("input", updateLiveTotal);
+
+$("filterButton").addEventListener("click", loadRecords);
+
+initializeDefaults();
+updateLiveTotal();
+
+startApp().catch(error => {
+  $("loginMessage").textContent =
+    "Error al iniciar la aplicación: " + error.message;
+});
+  
