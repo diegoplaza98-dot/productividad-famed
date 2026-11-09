@@ -91,6 +91,7 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
     <button class="tab" data-page="employees" type="button">Fisioterapeutas</button>
     <button class="tab" data-page="production" type="button">Producción</button>
     <button class="tab" data-page="statistics" type="button">Estadísticas</button>
+    <button class="tab" data-page="backups" type="button">Copias de seguridad</button>
   </nav>
   <div id="message" role="status" aria-live="polite"></div>
 
@@ -195,6 +196,25 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
     </div>
     <div class="panel"><h2>Comparativa anual</h2><p class="description" id="annualComparisonText">Resumen del año seleccionado.</p><div id="annualComparison"></div></div>
   </section>
+  <section id="backupsPage" hidden>
+  <div class="panel">
+    <h2>Copias de seguridad</h2>
+    <p>Descarga un archivo con todos los datos de tus clínicas, fisioterapeutas y registros de producción.</p>
+    <button class="primary" type="button" id="createBackup">
+      Descargar copia de seguridad
+    </button>
+  </div>
+
+  <div class="panel">
+    <h2>Restaurar copia de seguridad</h2>
+    <p>Selecciona un archivo JSON de una copia anterior para recuperar sus datos.</p>
+    <input id="backupFile" type="file" accept=".json,application/json">
+    <button class="secondary" type="button" id="restoreBackup">
+      Restaurar datos
+    </button>
+    <p>La restauración incorporará los datos de la copia sin borrar los registros actuales.</p>
+  </div>
+  </section>
 </main>
 </div>
 
@@ -250,6 +270,7 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
     $("employeesPage").hidden = page !== "employees";
     $("productionPage").hidden = page !== "production";
     $("statisticsPage").hidden = page !== "statistics";
+    $("backupsPage").hidden = page !== "backups";
     document.querySelectorAll(".tab[data-page]").forEach(tab => tab.classList.toggle("active", tab.dataset.page === page));
   }
   document.querySelectorAll(".tab[data-page]").forEach(button => button.addEventListener("click", async () => {
@@ -675,7 +696,182 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
   }
   ["statsYear","statsCompareYear","statsClinic","statsEmployees"].forEach(id=>$(id).addEventListener("change",renderStatistics));
   $("refreshStats").addEventListener("click",async()=>{try{await loadStatistics();showMessage("Estadísticas actualizadas.");}catch(error){showMessage("No se pudieron actualizar las estadísticas: "+error.message,"error");}});
+async function fetchAllOwnedRows(table) {
+  const pageSize = 1000;
+  let from = 0;
+  const allRows = [];
 
+  while (true) {
+    const { data, error } = await db
+      .from(table)
+      .select("*")
+      .eq("owner_id", currentUser.id)
+      .order("created_at", { ascending: true })
+      .range(from, from + pageSize - 1);
+
+    if (error) throw error;
+
+    allRows.push(...(data || []));
+
+    if (!data || data.length < pageSize) break;
+    from += pageSize;
+  }
+
+  return allRows;
+}
+
+$("createBackup").addEventListener("click", async () => {
+  const button = $("createBackup");
+
+  try {
+    button.disabled = true;
+    button.textContent = "Preparando copia...";
+
+    const backup = {
+      app: "Productividad FAMED",
+      format_version: 1,
+      exported_at: new Date().toISOString(),
+      clinics: await fetchAllOwnedRows("clinics"),
+      employees: await fetchAllOwnedRows("employees"),
+      monthly_records: await fetchAllOwnedRows("monthly_records")
+    };
+
+    const blob = new Blob(
+      [JSON.stringify(backup, null, 2)],
+      { type: "application/json" }
+    );
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const date = new Date().toISOString().slice(0, 10);
+
+    link.href = url;
+    link.download = "productividad-famed-copia-" + date + ".json";
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+    alert("Copia de seguridad descargada correctamente.");
+  } catch (error) {
+    alert("No se pudo crear la copia: " + error.message);
+  } finally {
+    button.disabled = false;
+    button.textContent = "Descargar copia de seguridad";
+  }
+});
+$("restoreBackup").addEventListener("click", async () => {
+  const fileInput = $("backupFile");
+  const button = $("restoreBackup");
+  const file = fileInput.files[0];
+
+  if (!file) {
+    alert("Selecciona primero un archivo de copia de seguridad.");
+    return;
+  }
+
+  if (!confirm(
+    "¿Quieres restaurar esta copia? Los datos se incorporarán a los actuales, sin borrar los que ya existen."
+  )) return;
+
+  try {
+    button.disabled = true;
+    button.textContent = "Restaurando...";
+
+    const backup = JSON.parse(await file.text());
+
+    if (
+      backup.app !== "Productividad FAMED" ||
+      backup.format_version !== 1 ||
+      !Array.isArray(backup.clinics) ||
+      !Array.isArray(backup.employees) ||
+      !Array.isArray(backup.monthly_records)
+    ) {
+      throw new Error("El archivo no tiene un formato de copia válido.");
+    }
+
+    const clinics = backup.clinics.map(row => ({
+      ...row,
+      owner_id: currentUser.id
+    }));
+
+    const employees = backup.employees.map(row => ({
+      ...row,
+      owner_id: currentUser.id
+    }));
+
+    const clinicIds = new Set(clinics.map(row => row.id));
+    const employeeIds = new Set(employees.map(row => row.id));
+
+    const seenRecords = new Set();
+
+    const records = backup.monthly_records.map(row => {
+      if (
+        !row.id ||
+        !clinicIds.has(row.clinic_id) ||
+        !employeeIds.has(row.employee_id) ||
+        !Number.isInteger(Number(row.year)) ||
+        !Number.isInteger(Number(row.month)) ||
+        Number(row.month) < 1 ||
+        Number(row.month) > 12
+      ) {
+        throw new Error("La copia contiene un registro incompleto o con referencias incorrectas.");
+      }
+
+      const key = [
+        row.clinic_id,
+        row.employee_id,
+        row.year,
+        row.month
+      ].join("|");
+
+      if (seenRecords.has(key)) {
+        throw new Error("La copia contiene registros mensuales duplicados.");
+      }
+
+      seenRecords.add(key);
+
+      const cleanRow = { ...row, owner_id: currentUser.id };
+      delete cleanRow.production;
+
+      return cleanRow;
+    });
+
+    async function importRows(table, rows, conflict) {
+      for (let i = 0; i < rows.length; i += 100) {
+        const batch = rows.slice(i, i + 100);
+
+        const { error } = await db
+          .from(table)
+          .upsert(batch, { onConflict: conflict });
+
+        if (error) throw error;
+      }
+    }
+
+    await importRows("clinics", clinics, "id");
+    await importRows("employees", employees, "id");
+    await importRows(
+      "monthly_records",
+      records,
+      "clinic_id,employee_id,year,month"
+    );
+
+    await loadAll();
+
+    fileInput.value = "";
+
+    alert("Restauración completada correctamente.");
+  } catch (error) {
+    alert("No se pudo restaurar la copia: " + error.message);
+  } finally {
+    button.disabled = false;
+    button.textContent = "Restaurar datos";
+  }
+});
+  
   async function boot() {
     try {
       initializeSupabase();
