@@ -677,6 +677,70 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
       $("quickCopyPrevious").disabled = false;
     }
     }
+    async function saveQuickRecords() {
+    const clinicId = $("quickClinic").value;
+    const year = Number($("quickYear").value);
+    const month = Number($("quickMonth").value);
+    const rows = [...$("quickTable").querySelectorAll("[data-quick-row]")];
+
+    if (!clinicId || !year || year < 2000 || year > 2100 || !rows.length) {
+      showMessage("Primero selecciona una clínica, un año y carga los fisioterapeutas.", "error");
+      return;
+    }
+
+    const recordsToSave = [];
+
+    for (const row of rows) {
+      const getValue = field => {
+        const value = Number(row.querySelector(`[data-quick-field="${field}"]`).value || 0);
+        return Number.isFinite(value) && value >= 0 ? value : null;
+      };
+
+      const therapy = getValue("therapy");
+      const classes = getValue("classes");
+      const objective = getValue("objective");
+      const hours = getValue("hours");
+
+      if ([therapy, classes, objective, hours].some(v => v === null)) {
+        showMessage("Revisa los importes y las horas: no pueden ser negativos.", "error");
+        return;
+      }
+
+      recordsToSave.push({
+        owner_id: currentUser.id,
+        clinic_id: clinicId,
+        employee_id: row.dataset.quickRow,
+        year,
+        month,
+        therapy_production: therapy,
+        group_classes_production: classes,
+        objective,
+        hours_worked: hours
+      });
+    }
+
+    $("quickSave").disabled = true;
+
+    try {
+      for (let i = 0; i < recordsToSave.length; i += 100) {
+        const batch = recordsToSave.slice(i, i + 100);
+        const { error } = await db
+          .from("monthly_records")
+          .upsert(batch, {
+            onConflict: "clinic_id,employee_id,year,month"
+          });
+
+        if (error) throw error;
+      }
+
+      renderQuickTable(recordsToSave);
+      showMessage("Todos los registros se han guardado correctamente.");
+    } catch (error) {
+      showMessage("Error al guardar los registros: " + error.message, "error");
+    } finally {
+      $("quickSave").disabled = false;
+    }
+    }
   async function loadRecords() {
     const month = Number($("filterMonth").value);
     const year = Number($("filterYear").value);
@@ -787,6 +851,7 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
   });
     $("quickLoad").addEventListener("click", loadQuickRecords);
     $("quickCopyPrevious").addEventListener("click", copyQuickPreviousMonth);
+    $("quickSave").addEventListener("click", saveQuickRecords);
     $("quickTable").addEventListener("input", event => {
     const row = event.target.closest("[data-quick-row]");
     if (!row) return;
