@@ -749,6 +749,7 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
   $("filterButton").addEventListener("click", async () => {
     try { await loadRecords(); } catch (error) { showMessage(error.message, "error"); }
   });
+    $("quickLoad").addEventListener("click", loadQuickRecords);
 
   const monthNames = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
   function fillStatsFilters() {
