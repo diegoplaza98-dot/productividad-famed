@@ -1200,6 +1200,8 @@ $("restoreBackup").addEventListener("click", async () => {
       $("recordYear").value = String(now.getFullYear());
       $("filterMonth").value = String(now.getMonth() + 1);
       $("filterYear").value = String(now.getFullYear());
+      $("quickMonth").value = String(now.getMonth() + 1);
+$("quickYear").value = String(now.getFullYear());
       updateLiveTotal();
       await startApp();
     } catch (error) {
