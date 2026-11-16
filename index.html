@@ -797,7 +797,7 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
         <div class="item-sub">Terapia: ${euro(therapy)} · Clases: ${euro(classes)}</div>
         <div class="record-total">${euro(production)}</div>
         <div class="item-sub">Objetivo: ${euro(objective)}${percentage === null ? "" : " · " + percentage.toFixed(1).replace(".", ",") + "% del objetivo"}</div>
-      </div><div class="item-actions"><button class="secondary" type="button" data-edit-record="${r.id}">Editar</button></div></div>`;
+            </div><div class="item-actions"><button class="secondary" type="button" data-edit-record="${r.id}">Editar</button><button class="danger" type="button" data-delete-record="${r.id}">Eliminar</button></div></div>`;
     }).join("");
     document.querySelectorAll("[data-edit-record]").forEach(b => b.addEventListener("click", () => editRecord(b.dataset.editRecord)));
   }
