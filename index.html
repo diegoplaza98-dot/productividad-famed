@@ -584,7 +584,7 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
       const record = existingRecords.find(r => r.employee_id === employee.id);
 
       return `
-        <tr data-quick-row="${employee.id}">
+                <tr data-quick-row="${employee.id}" data-quick-existing="${record ? "true" : "false"}">
           <td style="padding:10px 6px;font-weight:600;min-width:150px">${escapeHTML(employee.full_name)}</td>
                     <td><input type="number" min="0" step="0.01" value="${record ? record.therapy_production : ""}" data-quick-field="therapy" style="min-width:100px"></td>
           <td><input type="number" min="0" step="0.01" value="${record ? record.group_classes_production : ""}" data-quick-field="classes" style="min-width:100px"></td>
