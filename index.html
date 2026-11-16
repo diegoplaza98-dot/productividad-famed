@@ -167,6 +167,54 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
       <div id="recordCount" class="count" style="margin-top:16px"></div><div id="recordList"></div>
     </div>
   </section>
+  
+  <section id="quickPage" hidden>
+    <div class="panel">
+      <h2>Carga rápida mensual</h2>
+      <p class="description">Selecciona una clínica y un periodo. Aparecerán todos sus fisioterapeutas para introducir la producción de una sola vez.</p>
+      <div class="grid">
+        <div>
+          <label for="quickClinic">Clínica</label>
+          <select id="quickClinic" required></select>
+        </div>
+        <div>
+          <label for="quickYear">Año</label>
+          <input id="quickYear" type="number" min="2000" max="2100" required>
+        </div>
+        <div>
+          <label for="quickMonth">Mes</label>
+          <select id="quickMonth">
+            <option value="1">Enero</option>
+            <option value="2">Febrero</option>
+            <option value="3">Marzo</option>
+            <option value="4">Abril</option>
+            <option value="5">Mayo</option>
+            <option value="6">Junio</option>
+            <option value="7">Julio</option>
+            <option value="8">Agosto</option>
+            <option value="9">Septiembre</option>
+            <option value="10">Octubre</option>
+            <option value="11">Noviembre</option>
+            <option value="12">Diciembre</option>
+          </select>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="primary" type="button" id="quickLoad">Cargar fisioterapeutas</button>
+        <button class="secondary" type="button" id="quickCopyPrevious">Copiar mes anterior</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>Producción por fisioterapeuta</h2>
+      <div id="quickTable">
+        <div class="empty">Selecciona una clínica y un periodo para empezar.</div>
+      </div>
+      <div class="actions">
+        <button class="primary" type="button" id="quickSave">Guardar todos los registros</button>
+      </div>
+    </div>
+  </section>
+  
 
   <section id="statisticsPage" hidden>
     <div class="panel">
