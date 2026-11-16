@@ -565,6 +565,9 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
     const activeEmployees = employees.filter(e => e.active);
     $("recordClinic").innerHTML = '<option value="">Selecciona clínica</option>' + activeClinics.map(c => `<option value="${c.id}">${escapeHTML(c.name)}</option>`).join("");
     $("recordEmployee").innerHTML = '<option value="">Selecciona fisioterapeuta</option>' + activeEmployees.map(e => `<option value="${e.id}">${escapeHTML(e.full_name)}</option>`).join("");
+        const oldQuickClinic = $("quickClinic").value;
+    $("quickClinic").innerHTML = '<option value="">Selecciona clínica</option>' + activeClinics.map(c => `<option value="${c.id}">${escapeHTML(c.name)}</option>`).join("");
+    if (activeClinics.some(c => c.id === oldQuickClinic)) $("quickClinic").value = oldQuickClinic;
     if (activeClinics.some(c => c.id === oldClinic)) $("recordClinic").value = oldClinic;
     if (activeEmployees.some(e => e.id === oldEmployee)) $("recordEmployee").value = oldEmployee;
   }
