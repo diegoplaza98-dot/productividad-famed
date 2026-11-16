@@ -641,6 +641,42 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
       $("quickLoad").disabled = false;
     }
     }
+    async function copyQuickPreviousMonth() {
+    const clinicId = $("quickClinic").value;
+    let year = Number($("quickYear").value);
+    let month = Number($("quickMonth").value);
+
+    if (!clinicId || !year) {
+      showMessage("Selecciona una clínica y un año válido.", "error");
+      return;
+    }
+
+    month--;
+    if (month === 0) {
+      month = 12;
+      year--;
+    }
+
+    $("quickCopyPrevious").disabled = true;
+
+    try {
+      const { data, error } = await db
+        .from("monthly_records")
+        .select("*")
+        .eq("clinic_id", clinicId)
+        .eq("year", year)
+        .eq("month", month);
+
+      if (error) throw error;
+
+      renderQuickTable(data || []);
+      showMessage("Datos del mes anterior cargados. Revisa la tabla antes de guardar.");
+    } catch (error) {
+      showMessage("No se pudieron copiar los datos: " + error.message, "error");
+    } finally {
+      $("quickCopyPrevious").disabled = false;
+    }
+    }
   async function loadRecords() {
     const month = Number($("filterMonth").value);
     const year = Number($("filterYear").value);
@@ -750,6 +786,7 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
     try { await loadRecords(); } catch (error) { showMessage(error.message, "error"); }
   });
     $("quickLoad").addEventListener("click", loadQuickRecords);
+    $("quickCopyPrevious").addEventListener("click", copyQuickPreviousMonth);
     $("quickTable").addEventListener("input", event => {
     const row = event.target.closest("[data-quick-row]");
     if (!row) return;
