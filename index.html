@@ -758,6 +758,9 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
         if (error) throw error;
       }
 
+            $("filterMonth").value = String(month);
+      $("filterYear").value = String(year);
+      await loadRecords();
       renderQuickTable(recordsToSave);
       showMessage("Todos los registros se han guardado correctamente.");
     } catch (error) {
