@@ -586,10 +586,10 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
       return `
         <tr data-quick-row="${employee.id}">
           <td style="padding:10px 6px;font-weight:600;min-width:150px">${escapeHTML(employee.full_name)}</td>
-          <td><input type="number" min="0" step="0.01" value="${record?.therapy_production ?? 0}" data-quick-field="therapy" style="min-width:100px"></td>
-          <td><input type="number" min="0" step="0.01" value="${record?.group_classes_production ?? 0}" data-quick-field="classes" style="min-width:100px"></td>
-          <td><input type="number" min="0" step="0.01" value="${record?.objective ?? 0}" data-quick-field="objective" style="min-width:100px"></td>
-          <td><input type="number" min="0" step="0.01" value="${record?.hours_worked ?? 0}" data-quick-field="hours" style="min-width:85px"></td>
+                    <td><input type="number" min="0" step="0.01" value="${record ? record.therapy_production : ""}" data-quick-field="therapy" style="min-width:100px"></td>
+          <td><input type="number" min="0" step="0.01" value="${record ? record.group_classes_production : ""}" data-quick-field="classes" style="min-width:100px"></td>
+          <td><input type="number" min="0" step="0.01" value="${record ? record.objective : ""}" data-quick-field="objective" style="min-width:100px"></td>
+          <td><input type="number" min="0" step="0.01" value="${record ? record.hours_worked : ""}" data-quick-field="hours" style="min-width:85px"></td>
           <td style="padding:10px 6px;font-weight:700;white-space:nowrap" data-quick-total>${euro(Number(record?.therapy_production || 0) + Number(record?.group_classes_production || 0))}</td>
         </tr>`;
     }).join("");
