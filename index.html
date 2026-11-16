@@ -612,6 +612,35 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
       </div>
       <p class="note">Los registros que ya existían aparecen con sus datos actuales.</p>`;
     }
+    async function loadQuickRecords() {
+    const clinicId = $("quickClinic").value;
+    const year = Number($("quickYear").value);
+    const month = Number($("quickMonth").value);
+
+    if (!clinicId || !year || year < 2000 || year > 2100) {
+      showMessage("Selecciona una clínica y un año válido.", "error");
+      return;
+    }
+
+    $("quickLoad").disabled = true;
+
+    try {
+      const { data, error } = await db
+        .from("monthly_records")
+        .select("*")
+        .eq("clinic_id", clinicId)
+        .eq("year", year)
+        .eq("month", month);
+
+      if (error) throw error;
+
+      renderQuickTable(data || []);
+    } catch (error) {
+      showMessage("No se pudieron cargar los registros: " + error.message, "error");
+    } finally {
+      $("quickLoad").disabled = false;
+    }
+    }
   async function loadRecords() {
     const month = Number($("filterMonth").value);
     const year = Number($("filterYear").value);
