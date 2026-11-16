@@ -641,42 +641,61 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
       $("quickLoad").disabled = false;
     }
     }
-    async function copyQuickPreviousMonth() {
+      async function copyQuickPreviousMonth() {
     const clinicId = $("quickClinic").value;
-    let year = Number($("quickYear").value);
-    let month = Number($("quickMonth").value);
+    const targetYear = Number($("quickYear").value);
+    const targetMonth = Number($("quickMonth").value);
 
-    if (!clinicId || !year) {
+    if (!clinicId || !targetYear || targetYear < 2000 || targetYear > 2100) {
       showMessage("Selecciona una clínica y un año válido.", "error");
       return;
     }
 
-    month--;
-    if (month === 0) {
-      month = 12;
-      year--;
+    let previousYear = targetYear;
+    let previousMonth = targetMonth - 1;
+
+    if (previousMonth === 0) {
+      previousMonth = 12;
+      previousYear--;
     }
 
     $("quickCopyPrevious").disabled = true;
 
     try {
-      const { data, error } = await db
-        .from("monthly_records")
-        .select("*")
-        .eq("clinic_id", clinicId)
-        .eq("year", year)
-        .eq("month", month);
+      const [previousResult, currentResult] = await Promise.all([
+        db.from("monthly_records").select("*")
+          .eq("clinic_id", clinicId)
+          .eq("year", previousYear)
+          .eq("month", previousMonth),
+        db.from("monthly_records").select("*")
+          .eq("clinic_id", clinicId)
+          .eq("year", targetYear)
+          .eq("month", targetMonth)
+      ]);
 
-      if (error) throw error;
+      if (previousResult.error) throw previousResult.error;
+      if (currentResult.error) throw currentResult.error;
 
-      renderQuickTable(data || []);
-      showMessage("Datos del mes anterior cargados. Revisa la tabla antes de guardar.");
+      const currentRecords = currentResult.data || [];
+      const previousRecords = previousResult.data || [];
+
+      const mergedRecords = employees
+        .filter(e => e.active)
+        .map(employee =>
+          currentRecords.find(r => r.employee_id === employee.id) ||
+          previousRecords.find(r => r.employee_id === employee.id)
+        )
+        .filter(Boolean);
+
+      renderQuickTable(mergedRecords);
+
+      showMessage("Mes anterior cargado. Se han conservado los registros que ya existían en el mes seleccionado.");
     } catch (error) {
       showMessage("No se pudieron copiar los datos: " + error.message, "error");
     } finally {
       $("quickCopyPrevious").disabled = false;
     }
-    }
+      }
     async function saveQuickRecords() {
     const clinicId = $("quickClinic").value;
     const year = Number($("quickYear").value);
