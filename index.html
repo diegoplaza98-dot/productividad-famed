@@ -710,6 +710,12 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
     const recordsToSave = [];
 
     for (const row of rows) {
+            if (
+        row.dataset.quickExisting !== "true" &&
+        [...row.querySelectorAll("[data-quick-field]")].every(input => input.value.trim() === "")
+      ) {
+        continue;
+            }
       const getValue = field => {
         const value = Number(row.querySelector(`[data-quick-field="${field}"]`).value || 0);
         return Number.isFinite(value) && value >= 0 ? value : null;
