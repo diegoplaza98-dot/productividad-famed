@@ -800,6 +800,7 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
             </div><div class="item-actions"><button class="secondary" type="button" data-edit-record="${r.id}">Editar</button><button class="danger" type="button" data-delete-record="${r.id}">Eliminar</button></div></div>`;
     }).join("");
     document.querySelectorAll("[data-edit-record]").forEach(b => b.addEventListener("click", () => editRecord(b.dataset.editRecord)));
+        document.querySelectorAll("[data-delete-record]").forEach(b => b.addEventListener("click", () => deleteRecord(b.dataset.deleteRecord)));
   }
   $("recordForm").addEventListener("submit", async event => {
     event.preventDefault();
