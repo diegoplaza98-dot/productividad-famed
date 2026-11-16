@@ -839,6 +839,29 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
       $("recordSave").disabled = false;
     }
   });
+   async function deleteRecord(id) {
+    const record = records.find(item => item.id === id);
+    if (!record) return;
+
+    const employee = employees.find(e => e.id === record.employee_id);
+    const name = employee?.full_name || "este fisioterapeuta";
+
+    if (!confirm(`¿Seguro que quieres eliminar el registro de ${name}? Esta acción no se puede deshacer.`)) return;
+
+    try {
+      const { error } = await db
+        .from("monthly_records")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      await loadRecords();
+      showMessage("Registro eliminado correctamente.");
+    } catch (error) {
+      showMessage("No se pudo eliminar el registro: " + error.message, "error");
+    }
+   } 
   function editRecord(id) {
     const r = records.find(item => item.id === id);
     if (!r) return;
