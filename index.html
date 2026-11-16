@@ -322,6 +322,7 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
     $("clinicsPage").hidden = page !== "clinics";
     $("employeesPage").hidden = page !== "employees";
     $("productionPage").hidden = page !== "production";
+    $("quickPage").hidden = page !== "quick";
     $("statisticsPage").hidden = page !== "statistics";
     $("backupsPage").hidden = page !== "backups";
     document.querySelectorAll(".tab[data-page]").forEach(tab => tab.classList.toggle("active", tab.dataset.page === page));
