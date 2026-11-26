@@ -661,7 +661,7 @@ body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-ta
 
       return `
                 <tr data-quick-row="${employee.id}" data-quick-existing="${record ? "true" : "false"}">
-          <td style="padding:10px 6px;font-weight:600;min-width:150px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span>${escapeHTML(employee.full_name)}</span>${record && record.id ? `<button type="button" class="secondary danger" data-quick-delete="${record.id}" data-quick-name="${escapeHTML(employee.full_name)}" style="font-size:12px;padding:6px 10px;min-height:0">Eliminar registro</button>` : ""}</div></td>
+          <td style="padding:10px 6px;font-weight:600;min-width:150px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span>${escapeHTML(employee.full_name)}</span></div></td>
                     <td><input type="number" min="0" step="0.01" value="${record ? record.therapy_production : ""}" data-quick-field="therapy" style="min-width:100px"></td>
           <td><input type="number" min="0" step="0.01" value="${record ? record.group_classes_production : ""}" data-quick-field="classes" style="min-width:100px"></td>
           <td><input type="number" min="0" step="0.01" value="${record ? record.objective : ""}" data-quick-field="objective" style="min-width:100px"></td>
