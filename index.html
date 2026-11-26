@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#173f35">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="mobile-web-app-capable" content="yes">
 <title>Productividad FAMED</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -49,7 +53,7 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
 .total-box small{display:block;color:var(--muted);margin-bottom:5px}
 .record-total{font-weight:700;color:var(--green);margin-top:7px}
 .stats-filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:16px}
 .kpi{background:#f4f7f5;border:1px solid var(--border);border-radius:11px;padding:14px;min-width:0}
 .kpi small{display:block;color:var(--muted);font-size:12px;margin-bottom:8px}
 .kpi strong{display:block;color:var(--green);font-size:clamp(17px,2.5vw,24px);overflow-wrap:anywhere}
@@ -65,6 +69,66 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
 @media(max-width:420px){.stats-filters{grid-template-columns:1fr}}
 [hidden]{display:none!important}
 @media(max-width:600px){header{padding:15px}header h1{font-size:17px}main{margin-top:15px}.panel{padding:15px}.grid{grid-template-columns:1fr}.item{align-items:flex-start;flex-direction:column}.item-actions{justify-content:flex-start}}
+
+/* --- Mejoras móvil / app (borrador) --- */
+.lb-short{display:none}
+@media(max-width:380px){.lb-full{display:none}.lb-short{display:inline}}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+.filters-panel summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+.filters-panel summary::-webkit-details-marker{display:none}
+.filters-panel summary h2{margin:0}
+.filters-panel summary:after{content:"▾";color:var(--muted);font-size:18px}
+.filters-panel:not([open]) summary:after{content:"▸"}
+.filters-panel[open] summary{margin-bottom:7px}
+@media(max-width:760px){
+  .chart-wrap svg text{font-size:17px}
+  header{position:sticky;top:0;z-index:5;padding:12px 15px}
+  header small{display:none}
+  body{padding-bottom:78px}
+  main{margin-top:12px}
+  .tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;margin:0;gap:0;background:#fff;border-top:1px solid var(--border);padding:6px 4px calc(6px + env(safe-area-inset-bottom));overflow:visible;box-shadow:0 -2px 10px #0001}
+  .tab{flex:1;min-width:0;border:0;border-radius:10px;padding:8px 0 6px;font-size:9.5px;line-height:1.2;white-space:normal;text-align:center;background:transparent}
+  .tab:before{content:"";display:block;width:22px;height:22px;margin:0 auto 3px;background:currentColor;-webkit-mask:var(--ic) center/contain no-repeat;mask:var(--ic) center/contain no-repeat}
+  .tab[data-page=clinics]{--ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M3%2021V8l9-5%209%205v13%27/%3E%3Cpath%20d%3D%27M12%209v6M9%2012h6%27/%3E%3C/svg%3E")}
+  .tab[data-page=employees]{--ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Ccircle%20cx%3D%2712%27%20cy%3D%278%27%20r%3D%274%27/%3E%3Cpath%20d%3D%27M4%2021c0-4%204-6%208-6s8%202%208%206%27/%3E%3C/svg%3E")}
+  .tab[data-page=production]{--ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M4%2020V10M10%2020V4M16%2020v-8M22%2020H2%27/%3E%3C/svg%3E")}
+  .tab[data-page=quick]{--ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M13%202L4%2014h7l-1%208%209-12h-7z%27/%3E%3C/svg%3E")}
+  .tab[data-page=statistics]{--ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M3%2017l6-6%204%204%208-8%27/%3E%3Cpath%20d%3D%27M15%207h6v6%27/%3E%3C/svg%3E")}
+  .tab[data-page=backups]{--ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M5%203h11l3%203v15H5z%27/%3E%3Cpath%20d%3D%27M8%203v6h8V3M8%2021v-7h8v7%27/%3E%3C/svg%3E")}
+  .tab.active{background:#e6f0eb;color:var(--green)}
+  .stats-filters{grid-template-columns:1fr 1fr}
+  .stats-filters label{margin:6px 0 5px}
+  .description,.note{display:none}
+  button,input,select{min-height:44px}
+  .primary,.secondary{min-height:44px}
+}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.chips label{display:inline-flex;align-items:center;gap:6px;margin:0;font-weight:600;font-size:13px;border:1px solid var(--border);border-radius:20px;padding:8px 12px;background:#fff;cursor:pointer}
+.chips label.on{background:#e6f0eb;border-color:var(--green2);color:var(--green)}
+.chips input{width:auto;min-height:0;margin:0;accent-color:var(--green)}
+.chips i{width:10px;height:10px;border-radius:50%;display:inline-block}
+#cmpLegend span:before{background:var(--c)}
+.cmp-row{display:flex;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px solid var(--border);font-size:14px}
+.cmp-row span:first-child:before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);margin-right:8px}
+
+@media(max-width:760px){
+  #quickTable>div{overflow:visible!important}
+  #quickTable table{min-width:0!important;display:block}
+  #quickTable thead{display:none}
+  #quickTable tbody{display:block}
+  #quickTable tr[data-quick-row]{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;padding:14px 0;border-bottom:1px solid var(--border)}
+  #quickTable td{display:block;padding:0!important;min-width:0!important}
+  #quickTable td:first-child{grid-column:1/-1;font-size:16px}
+  #quickTable td:last-child{grid-column:1/-1;color:var(--green)}
+  #quickTable td input{min-width:0!important}
+  #quickTable td:not(:first-child):before{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:4px;white-space:normal}
+  #quickTable td:nth-child(2):before{content:"Terapia (€)"}
+  #quickTable td:nth-child(3):before{content:"Clases (€)"}
+  #quickTable td:nth-child(4):before{content:"Objetivo (€)"}
+  #quickTable td:nth-child(5):before{content:"Horas"}
+  #quickTable td:nth-child(6):before{content:"Total (€)"}
+}
 </style>
 </head>
 <body>
@@ -89,11 +153,11 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
 <main>
   <nav class="tabs">
     <button class="tab active" data-page="clinics" type="button">Clínicas</button>
-    <button class="tab" data-page="employees" type="button">Fisioterapeutas</button>
-    <button class="tab" data-page="production" type="button">Producción</button>
+    <button class="tab" data-page="employees" type="button"><span class="lb-full">Fisioterapeutas</span><span class="lb-short">Fisios</span></button>
+    <button class="tab" data-page="production" type="button" hidden>Producción</button>
     <button class="tab" data-page="quick" type="button">Carga rápida</button>
-    <button class="tab" data-page="statistics" type="button">Estadísticas</button>
-    <button class="tab" data-page="backups" type="button">Copias de seguridad</button>
+    <button class="tab" data-page="statistics" type="button"><span class="lb-full">Estadísticas</span><span class="lb-short">Estad.</span></button>
+    <button class="tab" data-page="backups" type="button"><span class="lb-full">Copias de seguridad</span><span class="lb-short">Copias</span></button>
   </nav>
   <div id="message" role="status" aria-live="polite"></div>
 
@@ -217,8 +281,8 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
   
 
   <section id="statisticsPage" hidden>
-    <div class="panel">
-      <h2>Filtros de análisis</h2>
+    <details class="panel filters-panel" id="filtersPanel" open>
+      <summary><h2>Filtros de análisis</h2></summary>
       <p class="description">Selecciona el periodo y el ámbito que quieres analizar. Puedes comparar dos años y uno o varios fisioterapeutas.</p>
       <div class="stats-filters">
         <div><label for="statsYear">Año principal</label><select id="statsYear"></select></div>
@@ -228,12 +292,24 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
       </div>
       <p class="note">En el selector de fisioterapeutas puedes seleccionar varios. Si no seleccionas ninguno, se incluirán todos.</p>
       <div class="actions"><button class="primary" type="button" id="refreshStats">Actualizar estadísticas</button></div>
-    </div>
+    </details>
     <div class="kpis">
       <div class="kpi"><small>Producción total</small><strong id="statProduction">—</strong></div>
       <div class="kpi"><small>Objetivos acumulados</small><strong id="statObjective">—</strong></div>
-      <div class="kpi"><small>Objetivo alcanzado</small><strong id="statAchievement">—</strong></div>
-      <div class="kpi"><small>Producción por hora</small><strong id="statHourly">—</strong></div>
+    </div>
+    <div class="panel" id="comparePanel">
+      <h2>Comparativa de series</h2>
+      <p class="description">Compara hasta 5 series en una misma gráfica, mes a mes.</p>
+      <div class="grid">
+        <div><label for="cmpMode">Comparar</label><select id="cmpMode"><option value="months">Meses</option><option value="years">Años</option><option value="employees">Fisioterapeutas</option><option value="clinics">Clínicas</option></select></div>
+        <div><label for="cmpMetric">Medida</label><select id="cmpMetric"><option value="total">Producción total</option><option value="therapy">Terapia</option><option value="classes">Clases colectivas</option></select></div>
+      </div>
+      <label>Elige hasta 5</label>
+      <div class="chips" id="cmpChips"></div>
+      <p class="note" id="cmpScope" style="display:block"></p>
+      <div class="legend" id="cmpLegend"></div>
+      <div class="chart-wrap" id="cmpChart"></div>
+      <div id="cmpTable"></div>
     </div>
     <div class="panel">
       <h2>Evolución mensual</h2><p class="description">Producción total por mes del año seleccionado.</p>
@@ -585,7 +661,7 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
 
       return `
                 <tr data-quick-row="${employee.id}" data-quick-existing="${record ? "true" : "false"}">
-          <td style="padding:10px 6px;font-weight:600;min-width:150px">${escapeHTML(employee.full_name)}</td>
+          <td style="padding:10px 6px;font-weight:600;min-width:150px"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span>${escapeHTML(employee.full_name)}</span></div></td>
                     <td><input type="number" min="0" step="0.01" value="${record ? record.therapy_production : ""}" data-quick-field="therapy" style="min-width:100px"></td>
           <td><input type="number" min="0" step="0.01" value="${record ? record.group_classes_production : ""}" data-quick-field="classes" style="min-width:100px"></td>
           <td><input type="number" min="0" step="0.01" value="${record ? record.objective : ""}" data-quick-field="objective" style="min-width:100px"></td>
@@ -761,7 +837,9 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
             $("filterMonth").value = String(month);
       $("filterYear").value = String(year);
       await loadRecords();
-      renderQuickTable(recordsToSave);
+      const saved = await db.from("monthly_records").select("*").eq("clinic_id", clinicId).eq("year", year).eq("month", month);
+      if (saved.error) throw saved.error;
+      renderQuickTable(saved.data || recordsToSave);
       showMessage("Todos los registros se han guardado correctamente.");
     } catch (error) {
       showMessage("Error al guardar los registros: " + error.message, "error");
@@ -946,16 +1024,24 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
   function sumStats(rows) {
     return rows.reduce((a,r) => { a.therapy += Number(r.therapy_production||0); a.classes += Number(r.group_classes_production||0); a.objective += Number(r.objective||0); a.hours += Number(r.hours_worked||0); a.total += Number(r.therapy_production||0)+Number(r.group_classes_production||0); return a; }, {therapy:0,classes:0,objective:0,hours:0,total:0});
   }
+  function monthlyTotals(rows) {
+    // null = mes sin registros (hueco en la gráfica); 0 = hay registros y suman 0
+    return monthNames.map((_,i) => { const r = rows.filter(x => Number(x.month) === i+1); return r.length ? r.reduce((v,x)=>v+Number(x.therapy_production||0)+Number(x.group_classes_production||0),0) : null; });
+  }
+  function gapPath(arr, x, y) {
+    let d = "", pen = false;
+    arr.forEach((v,i) => { if (v === null) { pen = false; return; } d += (pen ? "L" : "M") + x(i) + "," + y(v) + " "; pen = true; });
+    return d.trim();
+  }
   function svgLineChart(mainRows, compareRows) {
-    const main = monthNames.map((_,i) => mainRows.filter(r => Number(r.month) === i+1).reduce((v,r)=>v+Number(r.therapy_production||0)+Number(r.group_classes_production||0),0));
-    const compare = compareRows ? monthNames.map((_,i) => compareRows.filter(r => Number(r.month) === i+1).reduce((v,r)=>v+Number(r.therapy_production||0)+Number(r.group_classes_production||0),0)) : null;
-    const max = Math.max(1,...main,...(compare||[])); const W=720,H=260,L=58,R=16,T=18,B=38;
+    const main = monthlyTotals(mainRows);
+    const compare = compareRows ? monthlyTotals(compareRows) : null;
+    const max = Math.max(1,...main.filter(v=>v!==null),...(compare||[]).filter(v=>v!==null)); const W=720,H=280,L=80,R=20,T=18,B=44;
     const x=i=>L+i*(W-L-R)/11, y=v=>H-B-(v/max)*(H-T-B);
-    const grid = [0,.25,.5,.75,1].map(f=>{const yy=y(max*f);return `<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" stroke="#e5ebe7"/><text x="${L-8}" y="${yy+4}" text-anchor="end" font-size="10" fill="#78847e">${Math.round(max*f).toLocaleString("es-ES")}</text>`}).join("");
-    const path = arr => arr.map((v,i)=>(i?"L":"M")+x(i)+","+y(v)).join(" ");
-    const dots = (arr,color)=>arr.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="3.5" fill="${color}"/>`).join("");
-    const labels=monthNames.map((m,i)=>`<text x="${x(i)}" y="${H-12}" text-anchor="middle" font-size="10" fill="#78847e">${m}</text>`).join("");
-    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gráfico de evolución mensual">${grid}<path d="${path(main)}" fill="none" stroke="#173f35" stroke-width="3" stroke-linejoin="round"/>${dots(main,"#173f35")}${compare?`<path d="${path(compare)}" fill="none" stroke="#d6b65c" stroke-width="3" stroke-linejoin="round"/>${dots(compare,"#d6b65c")}`:""}${labels}</svg>`;
+    const grid = [0,.25,.5,.75,1].map(f=>{const yy=y(max*f);return `<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" stroke="#e5ebe7"/><text x="${L-8}" y="${yy+4}" text-anchor="end" font-size="12" fill="#78847e">${Math.round(max*f).toLocaleString("es-ES")}</text>`}).join("");
+    const dots = (arr,color)=>arr.map((v,i)=>v===null?"":`<circle cx="${x(i)}" cy="${y(v)}" r="5" fill="${color}"/>`).join("");
+    const labels=monthNames.map((m,i)=>`<text x="${x(i)}" y="${H-14}" text-anchor="middle" font-size="12" fill="#78847e">${m}</text>`).join("");
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gráfico de evolución mensual">${grid}<path d="${gapPath(main,x,y)}" fill="none" stroke="#173f35" stroke-width="3" stroke-linejoin="round"/>${dots(main,"#173f35")}${compare?`<path d="${gapPath(compare,x,y)}" fill="none" stroke="#d6b65c" stroke-width="3" stroke-linejoin="round"/>${dots(compare,"#d6b65c")}`:""}${labels}</svg>`;
   }
   function renderCategoryChart(t) {
     const total=t.therapy+t.classes;
@@ -976,14 +1062,96 @@ input,select{width:100%;padding:12px;border:1px solid var(--border);border-radiu
     const rows=filteredStats(year), totals=sumStats(rows), compareRows=compareYear?filteredStats(Number(compareYear)):null, compareTotals=compareRows?sumStats(compareRows):null;
     $("statProduction").textContent=euro(totals.total);
     $("statObjective").textContent=euro(totals.objective);
-    $("statAchievement").textContent=totals.objective>0?(totals.total/totals.objective*100).toFixed(1).replace(".",",")+"%":"—";
-    $("statHourly").textContent=totals.hours>0?euro(totals.total/totals.hours)+"/h":"—";
+    renderCompare();
     $("monthlyChart").innerHTML=svgLineChart(rows,compareRows);
     $("compareLegend").hidden=!compareRows;
     $("categoryChart").innerHTML=renderCategoryChart(totals);
     $("employeeChart").innerHTML=renderEmployeeChart(rows);
     if(compareTotals){const diff=totals.total-compareTotals.total;const pct=compareTotals.total>0?diff/compareTotals.total*100:null;$("annualComparisonText").textContent=`Comparación de ${year} frente a ${compareYear}.`;$("annualComparison").innerHTML=`<div class="grid"><div><div class="item-sub">${year}</div><div class="record-total">${euro(totals.total)}</div></div><div><div class="item-sub">${compareYear}</div><div class="record-total">${euro(compareTotals.total)}</div></div></div><p><strong>Diferencia:</strong> ${diff>=0?"+":"−"}${euro(Math.abs(diff))}${pct===null?"":" ("+(pct>=0?"+":"")+pct.toFixed(1).replace(".",",")+"%)"}</p>`;}else{$("annualComparisonText").textContent=`Resumen de ${year}. Selecciona otro año para comparar.`;$("annualComparison").innerHTML=`<p><strong>Terapia:</strong> ${euro(totals.therapy)} · <strong>Clases colectivas:</strong> ${euro(totals.classes)}</p><p><strong>Horas trabajadas:</strong> ${totals.hours.toLocaleString("es-ES")}</p>`;}
   }
+
+  // ---- Comparativa multi-serie ----
+  const CMP_COLORS=["#173f35","#d6b65c","#2f7fb8","#c0504d","#7b5ea7"];
+  let cmpSelected=[], cmpModeUsed=null;
+  function cmpValue(r,metric){const t=Number(r.therapy_production||0),c=Number(r.group_classes_production||0);return metric==="therapy"?t:metric==="classes"?c:t+c;}
+  const MONTH_FULL=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  function cmpOptions(mode){
+    if(mode==="months") return MONTH_FULL.map((n,i)=>({id:String(i+1),label:n}));
+    if(mode==="years") return [...new Set(statsRecords.map(r=>Number(r.year)))].sort((a,b)=>b-a).map(y=>({id:String(y),label:String(y)}));
+    if(mode==="employees") return employees.map(e=>({id:e.id,label:e.full_name}));
+    return clinics.map(c=>({id:c.id,label:c.name}));
+  }
+  function cmpRows(mode,id){
+    const clinicId=$("statsClinic").value, empIds=[...$("statsEmployees").selectedOptions].map(o=>o.value), year=Number($("statsYear").value);
+    return statsRecords.filter(r=>{
+      if(mode==="years") return Number(r.year)===Number(id)&&(!clinicId||r.clinic_id===clinicId)&&(!empIds.length||empIds.includes(r.employee_id));
+      if(mode==="employees") return Number(r.year)===year&&r.employee_id===id&&(!clinicId||r.clinic_id===clinicId);
+      return Number(r.year)===year&&r.clinic_id===id&&(!empIds.length||empIds.includes(r.employee_id));
+    });
+  }
+  function renderCompare(){
+    const mode=$("cmpMode").value, metric=$("cmpMetric").value, opts=cmpOptions(mode);
+    if(cmpModeUsed!==mode){cmpModeUsed=mode;
+      if(mode==="months"){const y=Number($("statsYear").value);const have=[...new Set(statsRecords.filter(r=>Number(r.year)===y).map(r=>Number(r.month)))].sort((a,b)=>a-b);cmpSelected=have.slice(-3).map(String);}
+      else cmpSelected=opts.slice(0,3).map(o=>o.id);}
+    cmpSelected=cmpSelected.filter(id=>opts.some(o=>o.id===id));
+    $("cmpChips").innerHTML=opts.map(o=>{const i=cmpSelected.indexOf(o.id);const on=i>=0;return `<label class="${on?"on":""}"><input type="checkbox" value="${escapeHTML(o.id)}" ${on?"checked":""}>${on?`<i style="background:${CMP_COLORS[i]}"></i>`:""}${escapeHTML(o.label)}</label>`}).join("")||'<div class="empty">Sin datos todavía.</div>';
+    $("cmpChips").querySelectorAll("input").forEach(inp=>inp.addEventListener("change",()=>{
+      if(inp.checked){ if(cmpSelected.length>=5){inp.checked=false;showMessage("Máximo 5 series en la gráfica.","error");return;} cmpSelected.push(inp.value);} else cmpSelected=cmpSelected.filter(x=>x!==inp.value);
+      renderCompare();}));
+    $("cmpScope").textContent=mode==="months"?"Compara los meses elegidos del año principal. Usa la clínica y los fisioterapeutas de los filtros. Un mes sin registros se muestra como «sin datos», no como 0.":mode==="years"?"Usa la clínica y los fisioterapeutas elegidos en los filtros.":mode==="employees"?"Usa el año y la clínica elegidos en los filtros.":"Usa el año y los fisioterapeutas elegidos en los filtros.";
+    if(mode==="months"){
+      const y=Number($("statsYear").value), clinicId=$("statsClinic").value, empSel=[...$("statsEmployees").selectedOptions].map(o=>o.value);
+      const emps=(empSel.length?employees.filter(e=>empSel.includes(e.id)):employees);
+      const base=statsRecords.filter(r=>Number(r.year)===y&&(!clinicId||r.clinic_id===clinicId));
+      const cats=[{label:"Total",ids:null},...emps.map(e=>({label:e.full_name,ids:[e.id]}))];
+      const ms=cmpSelected.slice().sort((a,b)=>a-b).map((id,i)=>({id,label:MONTH_FULL[Number(id)-1],color:CMP_COLORS[cmpSelected.indexOf(id)]}));
+      if(!ms.length){$("cmpChart").innerHTML='<div class="empty">Elige al menos un mes.</div>';$("cmpLegend").innerHTML="";$("cmpTable").innerHTML="";return;}
+      const val=(cat,m)=>{const rows=base.filter(r=>Number(r.month)===Number(m.id)&&(!cat.ids||cat.ids.includes(r.employee_id)));return rows.length?rows.reduce((v,r)=>v+cmpValue(r,metric),0):null;};
+      const data=cats.map(c=>ms.map(m=>val(c,m)));
+      const max=Math.max(1,...data.flat().filter(v=>v!==null));
+      const W=720,step=24,rowH=34+step*ms.length,H=cats.length*rowH+10,L=10,R=110,aw=W-L-R;
+      const bar=(c,ci)=>ms.map((m,mi)=>{const v=data[ci][mi];const yy=ci*rowH+32+mi*step;if(v===null)return `<text x="${L+4}" y="${yy+15}" font-size="16" fill="#9aa5a0">${m.label.slice(0,3)}: sin datos</text>`;const w=Math.max(2,v/max*aw);return `<rect x="${L}" y="${yy}" width="${w}" height="18" rx="4" fill="${m.color}"/><text x="${L+w+8}" y="${yy+15}" font-size="16" fill="#26332e">${Math.round(v).toLocaleString("es-ES")}</text>`}).join("");
+      $("cmpChart").innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Comparativa de meses por fisioterapeuta">${cats.map((c,ci)=>`<text x="${L}" y="${ci*rowH+22}" font-size="18" font-weight="700" fill="#26332e">${escapeHTML(c.label)}</text>`+bar(c,ci)).join("")}</svg>`;
+      $("cmpLegend").innerHTML=ms.map(m=>`<span style="--c:${m.color}">${m.label} ${y}</span>`).join("");
+      const tot=data[0];const first=tot.find(v=>v!==null);
+      $("cmpTable").innerHTML=ms.map((m,i)=>{const v=tot[i];const d=(v!==null&&first&&first>0&&i>0&&tot[0]!==null)?` <small style="color:${v>=tot[0]?"#245b39":"#a33"}">${(v-tot[0])/tot[0]>=0?"+":""}${(((v-tot[0])/tot[0])*100).toFixed(1).replace(".",",")}% vs ${ms[0].label}</small>`:"";return `<div class="cmp-row" style="--c:${m.color}"><span>${m.label}</span><strong>${v===null?"sin datos":euro(v)}${d}</strong></div>`;}).join("");
+      return;
+    }
+    const series=cmpSelected.map((id,i)=>{const rows=cmpRows(mode,id);const vals=monthNames.map((_,m)=>{const mr=rows.filter(r=>Number(r.month)===m+1);return mr.length?mr.reduce((v,r)=>v+cmpValue(r,metric),0):null;});return {id,label:opts.find(o=>o.id===id).label,color:CMP_COLORS[i],vals,total:vals.every(v=>v===null)?null:vals.reduce((a,b)=>a+(b||0),0)};});
+    if(!series.length){$("cmpChart").innerHTML='<div class="empty">Elige al menos una serie.</div>';$("cmpLegend").innerHTML="";$("cmpTable").innerHTML="";return;}
+    const W=720,H=300,L=80,R=20,T=18,B=44, max=Math.max(1,...series.flatMap(s=>s.vals.filter(v=>v!==null)));
+    const x=i=>L+i*(W-L-R)/11, y=v=>H-B-(v/max)*(H-T-B);
+    const grid=[0,.25,.5,.75,1].map(f=>{const yy=y(max*f);return `<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" stroke="#e5ebe7"/><text x="${L-8}" y="${yy+4}" text-anchor="end" font-size="12" fill="#78847e">${Math.round(max*f).toLocaleString("es-ES")}</text>`}).join("");
+    const labels=monthNames.map((m,i)=>`<text x="${x(i)}" y="${H-14}" text-anchor="middle" font-size="12" fill="#78847e">${m}</text>`).join("");
+    const lines=series.map(s=>`<path d="${gapPath(s.vals,x,y)}" fill="none" stroke="${s.color}" stroke-width="3" stroke-linejoin="round"/>`+s.vals.map((v,i)=>v===null?"":`<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="${s.color}"/>`).join("")).join("");
+    $("cmpChart").innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Comparativa de series por mes">${grid}${lines}${labels}</svg>`;
+    $("cmpLegend").innerHTML=series.map(s=>`<span style="--c:${s.color}">${escapeHTML(s.label)}</span>`).join("");
+    $("cmpTable").innerHTML=series.map(s=>`<div class="cmp-row" style="--c:${s.color}"><span>${escapeHTML(s.label)}</span><strong>${s.total===null?"sin datos":euro(s.total)}</strong></div>`).join("");
+  }
+  ["cmpMode","cmpMetric"].forEach(id=>$(id).addEventListener("change",renderCompare));
+
+  $("quickTable").addEventListener("click", async event => {
+    const btn = event.target.closest("[data-quick-delete]");
+    if (!btn) return;
+    const name = btn.dataset.quickName || "este fisioterapeuta";
+    const month = $("quickMonth").selectedOptions[0]?.textContent || "";
+    if (!confirm(`¿Seguro que quieres eliminar el registro de ${name} de ${month} ${$("quickYear").value}? Esta acción no se puede deshacer.`)) return;
+    btn.disabled = true;
+    try {
+      const { error } = await db.from("monthly_records").delete().eq("id", btn.dataset.quickDelete);
+      if (error) throw error;
+      const row = btn.closest("[data-quick-row]");
+      row.dataset.quickExisting = "false";
+      row.querySelectorAll("[data-quick-field]").forEach(i => i.value = "");
+      row.querySelector("[data-quick-total]").textContent = euro(0);
+      btn.remove();
+      showMessage("Registro eliminado correctamente.");
+    } catch (error) {
+      btn.disabled = false;
+      showMessage("No se pudo eliminar el registro: " + error.message, "error");
+    }
+  });
   ["statsYear","statsCompareYear","statsClinic","statsEmployees"].forEach(id=>$(id).addEventListener("change",renderStatistics));
   $("refreshStats").addEventListener("click",async()=>{try{await loadStatistics();showMessage("Estadísticas actualizadas.");}catch(error){showMessage("No se pudieron actualizar las estadísticas: "+error.message,"error");}});
 async function fetchAllOwnedRows(table) {
@@ -1452,6 +1620,10 @@ $("quickYear").value = String(now.getFullYear());
     else loginMessage("Se ha producido un error: " + message, true);
   });
 })();
+</script>
+<script>
+if(window.matchMedia("(max-width:760px)").matches){const f=document.getElementById("filtersPanel");if(f)f.removeAttribute("open");}
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}
 </script>
 </body>
 </html>
